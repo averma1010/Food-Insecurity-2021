@@ -1,5 +1,5 @@
 ## Hi, decided to call the data set Food_Sec, have loaded the entire data set and would then subset it to the columns we are working on.
-## There was one Raw_Data.csv file aswell but that had done this already but that didn't have all the observations
+## There was one Raw_Data.csv file aswell that had done this already but that didn't have all the observations
 
 Food_Sec <-  data.frame(read.csv("DATS6101-Project1-2022Fall/dec21pub.csv"))
 
@@ -13,7 +13,7 @@ install.packages('tidyverse')
 library(dplyr)
 
 head(FS_Subset)
-''
+
 FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "Counties" = "GTCO", "States" = "GESTFIPS", "Family Size" = "HRNUMHOU",	"Household Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship status" = "PRCITSHP",	"Number of Jobs" = "PEMJNUM",	"Hours on Jobs" = "PEHRUSL1" , "Education Level" = "PEEDUCA" , "FoodSecurity score" = "HRFS12MD")
 )
 
