@@ -2,7 +2,7 @@
 ## There was one Raw_Data.csv file aswell that had done this already but that didn't have all the observations
 getwd()
 
-Food_Sec <-  data.frame(read.csv("DATS6101-Project1-2022Fall/dec21pub.csv"))
+Food_Sec <-  data.frame(read.csv("dec21pub.csv"))
 
 str(Food_Sec)
 FS_Subset <- subset(Food_Sec, select = c("HRHHID",	"GTCO",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
@@ -33,6 +33,22 @@ FS_Subset[] <- lapply( FS_Subset, factor)
 str(FS_Subset)
 
 
+##Exploring the Food Security Score
+
+```{r, results='markup'}
+summary(FS_Subset$'FoodSecurity score')
+```
+## Installing ggplot, at then end we should just group all the library installation at the top
+
+library(ggplot2)
+
+
+ggplot(FS_Subset, aes(x=FS_Subset$'FoodSecurity score')) + geom_bar()
+
+##1 :High Food Security, 2 : Marginal Food Security , 3 : Low Food Security, 4  : Very Low Food Security ,-9 : No Response
+## Children’s Food Security Scale variables are coded as “Not in Universe” (-1) if there were no children in the household. 
+## Attachment 17, on page 288, contains details about the food security score. I have only given it a cursory glace, but we will have to read it in detail.
+
 ## Exploring the Counties indice
 
 ```{r, results='markup'}
@@ -44,11 +60,10 @@ summary(FS_Subset$Counties)
 ##Also not all counties are represented in this data. There are 3143 counties in the US in total, in this dataset we have 100 counties( including the 0 county).
 
 
-## Installing ggplot, at then end we should just group all the library installation at the top
-
-library(ggplot2)
 
 
 ggplot(FS_Subset, aes(x=Counties)) + geom_bar()
+
+
 
 
