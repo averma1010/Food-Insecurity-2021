@@ -15,7 +15,7 @@ library(dplyr)
 
 head(FS_Subset)
 
-FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "Counties" = "GTCO", "States" = "GESTFIPS", "Family Size" = "HRNUMHOU",	"Household Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship status" = "PRCITSHP",	"Number of Jobs" = "PEMJNUM",	"Hours on Jobs" = "PEHRUSL1" , "Education Level" = "PEEDUCA" , "FoodSecurity score" = "HRFS12MD")
+FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "Counties" = "GTCO", "States" = "GESTFIPS", "Family Size" = "HRNUMHOU",	"Household Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "FoodSecurity_score" = "HRFS12MD")
 
 ```{r, results='markup'}
 head(FS_Subset)
@@ -36,15 +36,16 @@ str(FS_Subset)
 ##Exploring the Food Security Score
 
 ```{r, results='markup'}
-summary(FS_Subset$'FoodSecurity score')
+summary(FS_Subset$'FoodSecurity_score')
 ```
 ## Installing ggplot, at then end we should just group all the library installation at the top
 
 library(ggplot2)
 
 
-ggplot(FS_Subset, aes(x=FS_Subset$'FoodSecurity score')) + geom_bar()
+ggplot(FS_Subset, aes(x=FoodSecurity_score, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar()
 
+  
 ##1 :High Food Security, 2 : Marginal Food Security , 3 : Low Food Security, 4  : Very Low Food Security ,-9 : No Response
 ## Children’s Food Security Scale variables are coded as “Not in Universe” (-1) if there were no children in the household. 
 ## Attachment 17, on page 288, contains details about the food security score. I have only given it a cursory glace, but we will have to read it in detail.
