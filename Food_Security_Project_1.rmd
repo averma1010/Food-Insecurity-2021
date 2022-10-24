@@ -11,9 +11,11 @@ FS_Subset <- subset(Food_Sec, select = c("HRHHID",	"GTCO",	"GESTFIPS",	"HRNUMHOU
 ## Installng tidyverse to use dplyr to rename the columns
 install.packages('tidyverse')
 
+```{r}
 library(dplyr)
-
+library(ezids)
 head(FS_Subset)
+```
 
 FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "Counties" = "GTCO", "States" = "GESTFIPS", "Family_Size" = "HRNUMHOU",	"Household_Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "FoodSecurity_score" = "HRFS12MD")
 
@@ -67,4 +69,19 @@ ggplot(FS_Subset, aes(x=Counties)) + geom_bar()
 
 
 
+```{r}
+food_fc <- subset(Food_Sec, HUFINAL == 001)
+head(food_fc)
+food_final <- subset(food_fc, select = c("HRHHID",	"GTCO",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
+str(food_final)
+```
 
+```{r data_ave, results='markup'}
+food_ave <- subset(food_final, select = c("HRHHID",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
+head(food_ave)
+
+#Now I rename the columns
+
+colnames(food_ave) <- c("ID", "No_of_jobs","Hours_of_job","Edcation_Level","Food_Seurity_Score")
+xkabledply(food_ave, title = "Data set")
+```
