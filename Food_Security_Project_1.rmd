@@ -4,7 +4,7 @@ getwd()
 
 ## Installng tidyverse to use dplyr to rename the columns
 install.packages('tidyverse')
-
+Food_Sec <- data.frame(read.csv("dec21pub.csv"))
 ```{r}
 library(dplyr)
 library(ezids)
@@ -12,7 +12,7 @@ library(ggplot2)
 ```
 
 ```{r, results='markup'}
-Food_Sec <- data.frame(read.csv("dec21pub.csv"))
+
 
 FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001)
 FS_Subset <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
@@ -31,6 +31,7 @@ str(FS_Subset)
 ##Exploring the Food Security Score
 
 ```{r, results='markup'}
+levels(FS_Subset$'FoodSecurity_score') <- c("No Response", "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
 summary(FS_Subset$'FoodSecurity_score')
 ```
   
@@ -43,12 +44,29 @@ summary(FS_Subset$'FoodSecurity_score')
 
 ```{r, results='markup'}
 ggplot(FS_Subset, aes(x=FoodSecurity_score, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar()
+
 ```
 
-  
+## Renaming levels of Ethnicity and Citizenship_Status
+```{r, results='markup'}
+levels(FS_Subset$'Ethnicity') <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian', 'White-black', 'White-AI', 'White-Asian', 'White-HP', 'Black-AI', 'Black-Asian', 'Black-HP', 'AI-Asian', 'AI-HP', 'Asian-HP', 'W-B-AI', 'W-B-A', 'W-B-HP', 'W-AI-A', 'W-AI-HP', 'W-A-HP', 'B-AI-A', 'W-B-AL-A', 'W-AI-A-HP', 'Other 3 race combo', 'Other 4 and 5 race combo')
+summary(FS_Subset$'Ethnicity', title = "PTDTRACE")
+
+summary(FS_Subset$'SNAP', title = "HESP1")
+
+levels(FS_Subset$'Citizenship_status') <- c('NATIVE, BORN IN THE UNITED STATES', 'NATIVE, BORN IN PUERTO RICO OR OTHER U.S. ISLAND AREAS', 'NATIVE, BORN ABROAD OF AMERICAN PARENT OR PARENTS', 'FOREIGN BORN, U.S. CITIZEN BY NATURALIZATION', 'FOREIGN BORN, NOT A CITIZEN OF THE UNITED STATES')
+summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 
 
+```
+## Plotting barcharts between all the levels of each factor and food security status
 
+```{r, results='markup'}
+for(i in levels(FS_Subset$Ethnicity)){
+   
+  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(y= Ethnicity, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( position = "dodge"))
+}
+```
 
 ```{r}
 food_fc <- subset(Food_Sec, HUFINAL == 001)
