@@ -89,5 +89,26 @@ head(food_ave)
 #Now I rename the columns
 
 colnames(food_ave) <- c("ID", "No_of_jobs","Hours_of_job","Edcation_Level","Food_Seurity_Score")
+colnames(food_ave) <- c("ID", "No_of_jobs","Hours_of_job","Education_Level","Food_Seurity_Score")
 xkabledply(food_ave, title = "Data set")
+str(food_ave)
+```
+
+```{r factor, results='markup'}
+food_ave$No_of_jobs = as.factor(food_ave$No_of_jobs)
+food_ave$Hours_of_job = as.factor(food_ave$Hours_of_job)
+food_ave$Education_Level = as.factor(food_ave$Education_Level)
+food_ave$Food_Seurity_Score = as.factor(food_ave$Food_Seurity_Score)
+str(food_ave)
+```
+
+
+```{r no_of_jobs, results='markup'}
+plot(food_ave$No_of_jobs)
+ggplot(food_ave) +
+  geom_bar(aes(x = No_of_jobs, fill = Food_Seurity_Score), position = "dodge") +
+  xlab("Jobs") + ylab("Count")
+```
+```{r, results='markup'}
+ 
 ```
