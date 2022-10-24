@@ -2,15 +2,6 @@
 ## There was one Raw_Data.csv file aswell that had done this already but that didn't have all the observations
 getwd()
 
-```{r, results='markup'}
-Food_Sec <- data.frame(read.csv("dec21pub.csv"))
-
-str(Food_Sec)
-
-FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001)
-FS_Subset <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
-```
-
 ## Installng tidyverse to use dplyr to rename the columns
 install.packages('tidyverse')
 
@@ -18,20 +9,15 @@ install.packages('tidyverse')
 library(dplyr)
 library(ezids)
 library(ggplot2)
-head(FS_Subset)
 ```
 
 ```{r, results='markup'}
+Food_Sec <- data.frame(read.csv("dec21pub.csv"))
+
+FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001)
+FS_Subset <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
+
 FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "States" = "GESTFIPS", "Family_Size" = "HRNUMHOU",	"Household_Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "FoodSecurity_score" = "HRFS12MD")
-```
-
-```{r, results='markup'}
-head(FS_Subset)
-str(FS_Subset)
-
-```
-
-
 
 ## Converting the all the columns to factors as they are all ordinal(except the Id, but since it's categorical i'm converting it into a factor too)
 
@@ -39,6 +25,7 @@ FS_Subset[] <- lapply( FS_Subset, factor)
 
 
 str(FS_Subset)
+```
 
 
 ##Exploring the Food Security Score
@@ -46,17 +33,19 @@ str(FS_Subset)
 ```{r, results='markup'}
 summary(FS_Subset$'FoodSecurity_score')
 ```
-
-
-
-
-
-ggplot(FS_Subset, aes(x=FoodSecurity_score, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar()
-
   
 ##1 :High Food Security, 2 : Marginal Food Security , 3 : Low Food Security, 4  : Very Low Food Security ,-9 : No Response
 ## Children’s Food Security Scale variables are coded as “Not in Universe” (-1) if there were no children in the household. 
 ## Attachment 17, on page 288, contains details about the food security score. I have only given it a cursory glace, but we will have to read it in detail.
+
+
+
+
+```{r, results='markup'}
+ggplot(FS_Subset, aes(x=FoodSecurity_score, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar()
+```
+
+  
 
 
 
@@ -75,26 +64,5 @@ head(food_ave)
 #Now I rename the columns
 
 colnames(food_ave) <- c("ID", "No_of_jobs","Hours_of_job","Edcation_Level","Food_Seurity_Score")
-colnames(food_ave) <- c("ID", "No_of_jobs","Hours_of_job","Education_Level","Food_Seurity_Score")
 xkabledply(food_ave, title = "Data set")
-str(food_ave)
-```
-
-```{r factor, results='markup'}
-food_ave$No_of_jobs = as.factor(food_ave$No_of_jobs)
-food_ave$Hours_of_job = as.factor(food_ave$Hours_of_job)
-food_ave$Education_Level = as.factor(food_ave$Education_Level)
-food_ave$Food_Seurity_Score = as.factor(food_ave$Food_Seurity_Score)
-str(food_ave)
-```
-
-
-```{r no_of_jobs, results='markup'}
-plot(food_ave$No_of_jobs)
-ggplot(food_ave) +
-  geom_bar(aes(x = No_of_jobs, fill = Food_Seurity_Score), position = "dodge") +
-  xlab("Jobs") + ylab("Count")
-```
-```{r, results='markup'}
- 
 ```
