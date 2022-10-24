@@ -58,20 +58,6 @@ ggplot(FS_Subset, aes(x=FoodSecurity_score, color =FoodSecurity_score, fill = Fo
 ## Children’s Food Security Scale variables are coded as “Not in Universe” (-1) if there were no children in the household. 
 ## Attachment 17, on page 288, contains details about the food security score. I have only given it a cursory glace, but we will have to read it in detail.
 
-## Exploring the Counties indice
-
-```{r, results='markup'}
-summary(FS_Subset$Counties)
-```
-
-
-## The first row is the county number, check the documentation to figure out the county, and the row just beneath it is the count. I'll have to check what county 0 means, i have a feeling it might mean that no county was reported in the survey.
-##Also not all counties are represented in this data. There are 3143 counties in the US in total, in this dataset we have 100 counties( including the 0 county).
-
-
-
-
-ggplot(FS_Subset, aes(x=Counties)) + geom_bar()
 
 
 
