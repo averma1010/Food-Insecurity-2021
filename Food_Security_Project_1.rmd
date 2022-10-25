@@ -5,9 +5,7 @@ getwd()
 ## Installng tidyverse to use dplyr to rename the columns
 install.packages('tidyverse')
 Food_Sec <- data.frame(read.csv("dec21pub.csv"))
-
-
-```{r} 
+```{r}
 library(dplyr)
 library(ezids)
 library(ggplot2)
@@ -17,9 +15,9 @@ library(ggplot2)
 
 
 FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001)
-FS_Subset <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD", "PRNMCHLD"))
+FS_Subset <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
 
-FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "States" = "GESTFIPS", "Family_Size" = "HRNUMHOU",	"Household_Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "FoodSecurity_score" = "HRFS12MD", "Number_of_Children" = "PRNMCHLD")
+FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "States" = "GESTFIPS", "Family_Size" = "HRNUMHOU",	"Household_Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "FoodSecurity_score" = "HRFS12MD")
 
 ## Converting the all the columns to factors as they are all ordinal(except the Id, but since it's categorical i'm converting it into a factor too)
 
@@ -34,10 +32,6 @@ str(FS_Subset)
 
 ```{r, results='markup'}
 levels(FS_Subset$'FoodSecurity_score') <- c("No Response", "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
-
-FS_Subset$"FS_Status" <- FS_Subset$FoodSecurity_score
-
-levels(FS_Subset$FS_Status) <- c("No respone", "Food Secure", "Food Secure", "Food Insecure", "Food Insecure")
 summary(FS_Subset$'FoodSecurity_score')
 ```
   
@@ -49,23 +43,20 @@ summary(FS_Subset$'FoodSecurity_score')
 
 
 ```{r, results='markup', }
-
-ggplot(FS_Subset, aes(x=FoodSecurity_score, fill=FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge") 
-  
-
-pie_FS <- FS_Subset %>% 
-  group_by(FS_Status) %>% # Variable to be transformed
+df <- FS_Subset %>% 
+  group_by(FoodSecurity_score) %>% # Variable to be transformed
   count() %>% 
   ungroup() %>% 
   mutate(perc = `n` / sum(`n`)) %>% 
   arrange(perc) %>%
   mutate(labels = scales::percent(perc))
 
-ggplot(pie_FS, aes(x = "", y = perc, fill = FS_Status)) +
+ggplot(df, aes(x = "", y = perc, fill = FoodSecurity_score)) +
   geom_col() +
     geom_text(aes(label = labels),
             position = position_stack(vjust = 0.5)) +
   coord_polar(theta = "y")
+
 
 
 ```
@@ -88,7 +79,7 @@ summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 table(FS_Subset$Ethnicity)
 for(i in levels(FS_Subset$Ethnicity)){
    
-  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FS_Status, fill = FS_Status)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
+  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
 }
 ```
 ```{r, results='markup'}
@@ -117,29 +108,10 @@ for(i in levels(FS_Subset$Citizenship_status)){
 ```
 
 
-```{r, results='markup'}
-for(i in levels(FS_Subset$Number_of_Children)){
-   print(ggplot(subset(FS_Subset, Number_of_Children == i ) , aes(x=  Number_of_Children, color =FoodSecurity_score, fill = FoodSecurity_score)) +     geom_bar(  aes(y = (..count..)/sum(..count..)*100), position = "dodge")) }
-
-
-```
-
-```{r}
-#food_fc <- subset(Food_Sec, HUFINAL == 001)
-#head(food_fc)
-#ood_final <- subset(food_fc, select = c("HRHHID",	"GTCO",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
-#str(food_final)
-```
 
 ```{r data_ave, results='markup'}
 food_ave <- subset(FS_Subset, select = c("Id",	"Number_of_Jobs",	"Hours_on_Jobs",	"Education_Level", "FoodSecurity_score"))
 head(food_ave)
-
-#Now I rename the columns
-
-colnames(food_ave) <- c("ID", "No_of_jobs","Hours_of_job","Edcation_Level","Food_Seurity_Score")
-xkabledply(food_ave, title = "Data set")
-xkabledply(food_ave, title = "Data set")
 str(food_ave)
 ```
 
@@ -147,6 +119,7 @@ str(food_ave)
 food_ave$Number_of_Jobs = as.factor(food_ave$Number_of_Jobs)
 food_ave$Education_Level = as.factor(food_ave$Education_Level)
 food_ave$FoodSecurity_score = as.factor(food_ave$FoodSecurity_score)
+food_ave$Hours_on_Jobs = as.numeric(food_ave$Hours_on_Jobs)
 str(food_ave)
 ```
 
@@ -336,61 +309,32 @@ ggplot(food_ave, aes(Hours_on_Jobs, fill = FoodSecurity_score)) +
 ```
 
 ```{r, results='markup'}
-cor(food_ave$Hours_on_Jobs,food_ave$FoodSecurity_score)
+vary_hours <- nrow(food_ave[food_ave$Hours_on_Jobs == -4,])
+vary_hours
 ```
 
-
-***States, Family size, and Household Income***
-
-```{r, results='markup'}
-levels(FS_Subset$'States') <- c('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY' )
-summary(FS_Subset$'States', title = "GESTFIPS")
-
-```
-
-## Plotting barcharts between all the levels of state and food security status
+There are `r nrow(food_ave[food_ave$Hours_on_Jobs == -4,])` whose working hours vary. 
 
 ```{r, results='markup'}
-for(i in levels(FS_Subset$States)){
-   
-  print(ggplot(subset(FS_Subset, States == i ) , aes(x= States, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
+summary(food_ave$Hours_on_Jobs)
+
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
 }
+getmode(food_ave$Hours_on_Jobs)
+```
+```{r}
+ggplot(food_ave, aes(x=FoodSecurity_score, y=Hours_on_Jobs)) + 
+  geom_boxplot( colour=c("red","blue","violet","navy blue","black"), outlier.shape=8, outlier.size=4) +
+  labs(title="Boxplot for Hours on Jobs", x="Control / Treatment", y = "Hours on Job")
 ```
 
-```{r, results='markup'}
-childless_fam<-subset(Food_Sec, PRNMCHLD==0, select = c(HRHHID, PRNMCHLD))
-
-#library(ggplot2)
-qqplot(childless_fam, FS_Subset$FoodSeurity_Score, plot.it = TRUE,  xlab="Childless family", ylab="Food security Score",  main="Childless families' food security score")
-
-ggplot(childless_fam, aes(y=food_una$FoodSeurity_Score)) + 
-  geom_boxplot() + 
-  geom_boxplot( colour="orange", fill="#7777cc") +
-  labs(title="Baseball player weight boxplot using `ggplot`",x="", y = "weight (lbs)")
+```{r, results='markup', warning=FALSE}
+h_anova <- aov(Hours_on_Jobs ~ FoodSecurity_score, data = food_ave)
+h_tuskey <- TukeyHSD(h_anova)
+summary(h_anova)
+h_tuskey
 ```
 
-```{r data_una, results='markup'}
-food_una <- subset(food_final, select = c("HRHHID",	"GESTFIPS", "HRNUMHOU",	"HEFAMINC", "HRFS12MD"))
-head(food_una)
-
-#Now I rename the columns
-
-colnames(food_una) <- c("Id", "States","Family_Size","Household_Income","FoodSeurity_Score")
-
-```
-
-```{r data_una, results='markup'}
-library(ggplot2)
-qqplot(food_una$Household_Income, food_una$FoodSeurity_Score, plot.it = TRUE,  xlab="Household income", ylab="Food security Score",  col=food_una$States, main="QQ Plot for Food security vs Household income")
-
-```
-
-```{r, results='markup'}
-summary(FS_Subset$Family_Size)
-```
-
-```{r data_una, results='markup'}
-library(ggplot2)
-qqplot(food_una$Family_Size, food_una$FoodSeurity_Score, plot.it = TRUE,  xlab="Family size", ylab="Food security Score",  col=food_una$Family_Size, main="QQ Plot for Food security vs Family")
-
-```
+2 - 1, 3 -1, 4 -1, 3 -2, 4 -2 have significant difference in there mean.
