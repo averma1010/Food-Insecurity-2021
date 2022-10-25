@@ -84,7 +84,7 @@ for(i in levels(FS_Subset$Ethnicity)){
 ```
 ```{r, results='markup'}
 
-selected <- c(1:10)
+selected <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian', 'White-black', 'White-AI', 'White-Asian', 'White-HP', 'Black-AI', 'Black-Asian', 'Black-HP', 'AI-Asian', 'AI-HP', 'Asian-HP', 'W-B-AI', 'W-B-A', 'W-B-HP', 'W-AI-A', 'W-AI-HP', 'W-A-HP', 'B-AI-A', 'W-B-AL-A', 'W-AI-A-HP')
 
 FS_ss <- FS_Subset[FS_Subset$Ethnicity %in% selected,]
 
