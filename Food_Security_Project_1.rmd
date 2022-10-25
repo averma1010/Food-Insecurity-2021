@@ -85,10 +85,25 @@ summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 ## Plotting barcharts between all the levels of each factor and food security status
 
 ```{r, results='markup'}
+table(FS_Subset$Ethnicity)
 for(i in levels(FS_Subset$Ethnicity)){
    
   print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FS_Status, fill = FS_Status)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
 }
+```
+```{r, results='markup'}
+
+selected <- c(1:10)
+
+FS_ss <- FS_Subset[FS_Subset$Ethnicity %in% selected,]
+
+FS_ss <- droplevels(FS_ss)
+
+
+chi_test <- table(FS_ss$Ethnicity, FS_ss$FoodSecurity_score)
+chi_test
+str(FS_ss)
+chisq.test(chi_test)
 ```
 
 ```{r, results='markup'}
