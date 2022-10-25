@@ -103,13 +103,11 @@ for(i in levels(FS_Subset$Citizenship_status)){
 ```{r data_ave, results='markup'}
 food_ave <- subset(FS_Subset, select = c("Id",	"Number_of_Jobs",	"Hours_on_Jobs",	"Education_Level", "FoodSecurity_score"))
 head(food_ave)
-<<<<<<< Updated upstream
 
 #Now I rename the columns
 
 colnames(food_ave) <- c("ID", "No_of_jobs","Hours_of_job","Edcation_Level","Food_Seurity_Score")
 xkabledply(food_ave, title = "Data set")
-=======
 xkabledply(food_ave, title = "Data set")
 str(food_ave)
 ```
@@ -304,7 +302,6 @@ ggplot(food_ave, aes(Hours_on_Jobs, color= FoodSecurity_score)) +
 ggplot(food_ave, aes(Hours_on_Jobs, fill = FoodSecurity_score)) + 
         geom_histogram(binwidth=5) + 
         facet_wrap(~FoodSecurity_score)
->>>>>>> Stashed changes
 ```
 
 ```{r, results='markup'}
