@@ -34,6 +34,10 @@ str(FS_Subset)
 
 ```{r, results='markup'}
 levels(FS_Subset$'FoodSecurity_score') <- c("No Response", "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
+
+FS_Subset$"FS_Status" <- FS_Subset$FoodSecurity_score
+
+levels(FS_Subset$FS_Status) <- c("No respone", "Food Secure", "Food Secure", "Food Insecure", "Food Insecure")
 summary(FS_Subset$'FoodSecurity_score')
 ```
   
@@ -45,20 +49,23 @@ summary(FS_Subset$'FoodSecurity_score')
 
 
 ```{r, results='markup', }
-df <- FS_Subset %>% 
-  group_by(FoodSecurity_score) %>% # Variable to be transformed
+
+ggplot(FS_Subset, aes(x=FoodSecurity_score, fill=FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge") 
+  
+
+pie_FS <- FS_Subset %>% 
+  group_by(FS_Status) %>% # Variable to be transformed
   count() %>% 
   ungroup() %>% 
   mutate(perc = `n` / sum(`n`)) %>% 
   arrange(perc) %>%
   mutate(labels = scales::percent(perc))
 
-ggplot(df, aes(x = "", y = perc, fill = FoodSecurity_score)) +
+ggplot(pie_FS, aes(x = "", y = perc, fill = FS_Status)) +
   geom_col() +
     geom_text(aes(label = labels),
             position = position_stack(vjust = 0.5)) +
   coord_polar(theta = "y")
-
 
 
 ```
@@ -80,7 +87,7 @@ summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 ```{r, results='markup'}
 for(i in levels(FS_Subset$Ethnicity)){
    
-  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
+  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FS_Status, fill = FS_Status)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
 }
 ```
 
