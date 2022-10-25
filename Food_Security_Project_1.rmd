@@ -5,7 +5,9 @@ getwd()
 ## Installng tidyverse to use dplyr to rename the columns
 install.packages('tidyverse')
 Food_Sec <- data.frame(read.csv("dec21pub.csv"))
-```{r}
+
+
+```{r} 
 library(dplyr)
 library(ezids)
 library(ggplot2)
@@ -15,9 +17,9 @@ library(ggplot2)
 
 
 FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001)
-FS_Subset <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
+FS_Subset <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD", "PRNMCHLD"))
 
-FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "States" = "GESTFIPS", "Family_Size" = "HRNUMHOU",	"Household_Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "FoodSecurity_score" = "HRFS12MD")
+FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "States" = "GESTFIPS", "Family_Size" = "HRNUMHOU",	"Household_Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "FoodSecurity_score" = "HRFS12MD", "Number_of_Children" = "PRNMCHLD")
 
 ## Converting the all the columns to factors as they are all ordinal(except the Id, but since it's categorical i'm converting it into a factor too)
 
@@ -93,19 +95,224 @@ for(i in levels(FS_Subset$Citizenship_status)){
 ```
 
 
+```{r, results='markup'}
+for(i in levels(FS_Subset$Number_of_Children)){
+   print(ggplot(subset(FS_Subset, Number_of_Children == i ) , aes(x=  Number_of_Children, color =FoodSecurity_score, fill = FoodSecurity_score)) +     geom_bar(  aes(y = (..count..)/sum(..count..)*100), position = "dodge")) }
+
+
+```
+
 ```{r}
-food_fc <- subset(Food_Sec, HUFINAL == 001)
-head(food_fc)
-food_final <- subset(food_fc, select = c("HRHHID",	"GTCO",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
-str(food_final)
+#food_fc <- subset(Food_Sec, HUFINAL == 001)
+#head(food_fc)
+#ood_final <- subset(food_fc, select = c("HRHHID",	"GTCO",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
+#str(food_final)
 ```
 
 ```{r data_ave, results='markup'}
-food_ave <- subset(food_final, select = c("HRHHID",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
+food_ave <- subset(FS_Subset, select = c("Id",	"Number_of_Jobs",	"Hours_on_Jobs",	"Education_Level", "FoodSecurity_score"))
 head(food_ave)
 
 #Now I rename the columns
 
 colnames(food_ave) <- c("ID", "No_of_jobs","Hours_of_job","Edcation_Level","Food_Seurity_Score")
 xkabledply(food_ave, title = "Data set")
+xkabledply(food_ave, title = "Data set")
+str(food_ave)
+```
+
+```{r factor, results='markup'}
+food_ave$Number_of_Jobs = as.factor(food_ave$Number_of_Jobs)
+food_ave$Education_Level = as.factor(food_ave$Education_Level)
+food_ave$FoodSecurity_score = as.factor(food_ave$FoodSecurity_score)
+str(food_ave)
+```
+
+### Number of Jobs
+
+```{r no_of_jobs, results='markup'}
+plot(food_ave$Number_of_Jobs)
+ggplot(food_ave) +
+  geom_bar(aes(x = Number_of_Jobs, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Jobs") + ylab("Count")
+```
+
+
+```{r, results='markup'}
+ggplot(subset(food_ave, Number_of_Jobs == -1)) +
+  geom_bar(aes(x = Number_of_Jobs, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Jobs") + ylab("Count")
+
+ggplot(subset(food_ave, Number_of_Jobs == 2)) +
+  geom_bar(aes(x = Number_of_Jobs, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Jobs") + ylab("Count")
+
+ggplot(subset(food_ave, Number_of_Jobs == 3)) +
+  geom_bar(aes(x = Number_of_Jobs, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Jobs") + ylab("Count")
+
+ggplot(subset(food_ave, Number_of_Jobs == 4)) +
+  geom_bar(aes(x = Number_of_Jobs, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Jobs") + ylab("Count")
+```
+
+Here 
+* 1 High Food Security
+* 2 Marginal Food Security 
+* 3 Low Food Security
+* 4 Very Low Food Security
+* -9 No Response
+
+
+In the above graphs, people say that they have High Food Security irrespective of the number of jobs. But lets use Chi-Square test to see if they are really independent of each other
+
+```{r, results='markup'}
+contable <- table(food_ave$Number_of_Jobs, food_ave$FoodSecurity_score)
+xkabledply(contable)
+
+## Chi-Square Test 
+chi_test <- chisq.test(contable, correct = F)
+chi_test
+```
+
+The result gave warnings as the estimated value for some cells are very low.
+From the test, we see that the P-value for the Chi-square test is 0.3871 which is greater than the default value 0.05. Hence we accept the null hypothesis and hence, Number of Jobs doesn't significantly affect the Food Security.
+
+
+###Education Level
+
+```{r, results='markup'}
+edu_freq <- as.data.frame(table(food_ave$Education_Level))
+edu_freq
+```
+
+```{r , results='markup'}
+plot(food_ave$Education_Level)
+ggplot(food_ave) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Jobs") + ylab("Count")
+```
+The response is understood as follows:
+
+31 LESS THAN 1ST GRADE
+32 1ST, 2ND, 3RD OR 4TH GRADE
+33 5TH OR 6TH GRADE
+34 7TH OR 8TH GRADE
+35 9TH GRADE
+36 10TH GRADE
+37 11TH GRADE
+38 12TH GRADE NO DIPLOMA
+39 HIGH SCHOOL GRAD-DIPLOMA OR EQUIV (GED)
+40 SOME COLLEGE BUT NO DEGREE
+41 ASSOCIATE DEGREE-OCCUPATIONAL/VOCATIONAL
+42 ASSOCIATE DEGREE-ACADEMIC PROGRAM
+43 BACHELOR'S DEGREE (EX: BA, AB, BS)
+44 MASTER'S DEGREE (EX: MA, MS, MEng, MEd, MSW)
+45 PROFESSIONAL SCHOOL DEG (EX: MD, DDS, DVM)
+46 DOCTORATE DEGREE (EX: PhD, EdD)
+
+```{r, results='markup'}
+ggplot(subset(food_ave, Education_Level == -1)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 31)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 32)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 33)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 34)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 35)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 36)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 37)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 38)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 39)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 40)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 41)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 42)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 43)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 44)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 45)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+
+ggplot(subset(food_ave, Education_Level == 46)) +
+  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Education") + ylab("Count")
+```
+
+```{r, results='markup'}
+contable_edu <- table(food_ave$Education_Level, food_ave$FoodSecurity_score)
+xkabledply(contable_edu)
+
+## Chi-Square Test 
+chi_test <- chisq.test(contable_edu, correct = F)
+chi_test
+```
+
+`Education_Level` is having a significant effect on the Food Security of People
+
+##Hours_on_Jobs
+
+```{r , results='markup'}
+plot(food_ave$Hours_on_Jobs)
+ggplot(food_ave) +
+  geom_bar(aes(x = Hours_on_Jobs, fill = FoodSecurity_score), position = "dodge") +
+  xlab("Jobs") + ylab("Count")
+```
+
+```{r, results='markup'}
+ggplot(food_ave, aes(Hours_on_Jobs, fill = FoodSecurity_score)) + 
+        geom_histogram(binwidth=5)
+ggplot(food_ave, aes(Hours_on_Jobs)) + 
+        geom_freqpoly(binwidth=1)
+ggplot(food_ave, aes(Hours_on_Jobs, color= FoodSecurity_score)) + 
+        geom_freqpoly(binwidth=25)
+ggplot(food_ave, aes(Hours_on_Jobs, fill = FoodSecurity_score)) + 
+        geom_histogram(binwidth=5) + 
+        facet_wrap(~FoodSecurity_score)
+```
+
+```{r, results='markup'}
+cor(food_ave$Hours_on_Jobs,food_ave$FoodSecurity_score)
 ```
