@@ -323,3 +323,59 @@ ggplot(food_ave, aes(Hours_on_Jobs, fill = FoodSecurity_score)) +
 ```{r, results='markup'}
 cor(food_ave$Hours_on_Jobs,food_ave$FoodSecurity_score)
 ```
+
+
+***States, Family size, and Household Income***
+
+```{r, results='markup'}
+levels(FS_Subset$'States') <- c('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY' )
+summary(FS_Subset$'States', title = "GESTFIPS")
+
+```
+
+## Plotting barcharts between all the levels of state and food security status
+
+```{r, results='markup'}
+for(i in levels(FS_Subset$States)){
+   
+  print(ggplot(subset(FS_Subset, States == i ) , aes(x= States, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
+}
+```
+
+```{r, results='markup'}
+childless_fam<-subset(Food_Sec, PRNMCHLD==0, select = c(HRHHID, PRNMCHLD))
+
+#library(ggplot2)
+qqplot(childless_fam, FS_Subset$FoodSeurity_Score, plot.it = TRUE,  xlab="Childless family", ylab="Food security Score",  main="Childless families' food security score")
+
+ggplot(childless_fam, aes(y=food_una$FoodSeurity_Score)) + 
+  geom_boxplot() + 
+  geom_boxplot( colour="orange", fill="#7777cc") +
+  labs(title="Baseball player weight boxplot using `ggplot`",x="", y = "weight (lbs)")
+```
+
+```{r data_una, results='markup'}
+food_una <- subset(food_final, select = c("HRHHID",	"GESTFIPS", "HRNUMHOU",	"HEFAMINC", "HRFS12MD"))
+head(food_una)
+
+#Now I rename the columns
+
+colnames(food_una) <- c("Id", "States","Family_Size","Household_Income","FoodSeurity_Score")
+
+```
+
+```{r data_una, results='markup'}
+library(ggplot2)
+qqplot(food_una$Household_Income, food_una$FoodSeurity_Score, plot.it = TRUE,  xlab="Household income", ylab="Food security Score",  col=food_una$States, main="QQ Plot for Food security vs Household income")
+
+```
+
+```{r, results='markup'}
+summary(FS_Subset$Family_Size)
+```
+
+```{r data_una, results='markup'}
+library(ggplot2)
+qqplot(food_una$Family_Size, food_una$FoodSeurity_Score, plot.it = TRUE,  xlab="Family size", ylab="Food security Score",  col=food_una$Family_Size, main="QQ Plot for Food security vs Family")
+
+```
