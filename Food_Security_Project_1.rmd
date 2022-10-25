@@ -330,81 +330,6 @@ ggplot(food_ave, aes(x=FoodSecurity_score, y=Hours_on_Jobs)) +
   labs(title="Boxplot for Hours on Jobs", x="Control / Treatment", y = "Hours on Job")
 ```
 
-<<<<<<< HEAD
-```{r, results='markup'}
-childless_fam<-subset(FS_Subset, PRNMCHLD==0, select = c(HRHHID, PRNMCHLD))
-
-#library(ggplot2)
-qqplot(childless_fam, FS_Subset$FoodSeurity_Score, plot.it = TRUE,  xlab="Childless family", ylab="Food security Score",  main="Childless families' food security score")
-
-ggplot(childless_fam, aes(y=food_una$FoodSeurity_Score)) + 
-  geom_boxplot() + 
-  geom_boxplot( colour="orange", fill="#7777cc") 
-```
-
-```{r data_una, results='markup'}
-food_una <- subset(FS_Subset, select = c("Id", "States","Family_Size","Household_Income","FoodSecurity_score", "Number_of_Children"))
-head(food_una)
-
-```
-```{r data_una, results='markup'}
-ok_state<-subset(FS_Subset, States=="40")
-me_state<-subset(FS_Subset, States=="23")
-table(ok_state$Household_Income)
-sum(table(ok_state$Household_Income))
-table(me_state$Household_Income)
-sum(table(me_state$Household_Income))
-```
-
-Reference to household income: 
-1 LESS THAN $5,000  
-2 5,000 TO 7,499  
-3 7,500 TO 9,999  
-4 10,000 TO 12,499  
-5 12,500 TO 14,999  
-6 15,000 TO 19,999  
-7 20,000 TO 24,999  
-8 25,000 TO 29,999  
-9 30,000 TO 34,999  
-10 35,000 TO 39,999  
-11 40,000 TO 49,999  
-12 50,000 TO 59,999  
-13 60,000 TO 74,999  
-14 75,000 TO 99,999  
-15 100,000 TO 149,999  
-16 150,000 OR MORE  
-
-```{r}
-income_t <- table(FS_Subset$Household_Income, FS_Subset$FoodSecurity_score)
-chisq.test(income_t)
-```
-We can say that Household income is affecting food insecurity. 
-
-```{r data_una, results='markup'}
-library(ggplot2)
-qqplot(food_una$Household_Income, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="Household income", ylab="Food security Score", main="QQ Plot for Food security vs Household income")
-
-```
-
-```{r, results='markup'}
-summary(FS_Subset$Family_Size)
-```
-
-```{r data_una, results='markup'}
-library(ggplot2)
-qqplot(food_una$Family_Size, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="Family size", ylab="Food security Score", main="QQ Plot for Food security vs Family")
-
-```
-
-```{r data_una, results='markup'}
-
-ggplot(data=food_una, mapping = aes(x = Family_Size, y = FoodSecurity_score)) + 
-  geom_point(aes(color = Household_Income)) +
-  theme_bw()
-
-```
-
-=======
 ```{r, results='markup', warning=FALSE}
 h_anova <- aov(Hours_on_Jobs ~ FoodSecurity_score, data = food_ave)
 h_tuskey <- TukeyHSD(h_anova)
@@ -413,4 +338,3 @@ h_tuskey
 ```
 
 2 - 1, 3 -1, 4 -1, 3 -2, 4 -2 have significant difference in there mean.
->>>>>>> 8657d5728a00f036f19d3ba04f8e0d67a4b3431f
