@@ -1,7 +1,7 @@
 ## Hi, decided to call the data set Food_Sec, have loaded the entire data set and would then subset it to the columns we are working on.
 ## There was one Raw_Data.csv file aswell that had done this already but that didn't have all the observations
 getwd()
-
+install.packages("epiR")
 ## Installng tidyverse to use dplyr to rename the columns
 install.packages('tidyverse')
 
@@ -13,20 +13,21 @@ Food_Sec <- data.frame(read.csv("dec21pub.csv"))
 library(dplyr)
 library(ezids)
 library(ggplot2)
+library(epiR)
 ```
 
 ```{r, results='markup'}
 
 
-FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001)
-FS_Subset <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD"))
+FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001 & HRFS12MD != -9)
+FS_Subset <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD", "PRNMCHLD"))
 
 FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "States" = "GESTFIPS", "Family_Size" = "HRNUMHOU",	"Household_Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "FoodSecurity_score" = "HRFS12MD")
 
 ## Converting the all the columns to factors as they are all ordinal(except the Id, but since it's categorical i'm converting it into a factor too)
 
-FS_Subset[] <- lapply( FS_Subset, factor)
 
+FS_Subset[] <- lapply( FS_Subset, factor)
 
 str(FS_Subset)
 ```
@@ -35,8 +36,13 @@ str(FS_Subset)
 ##Exploring the Food Security Score
 
 ```{r, results='markup'}
-levels(FS_Subset$'FoodSecurity_score') <- c("No Response", "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
+levels(FS_Subset$'FoodSecurity_score') <- c( "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
 summary(FS_Subset$'FoodSecurity_score')
+
+
+FS_Subset$FS_Status <- FS_Subset$FoodSecurity_score
+
+levels(FS_Subset$FS_Status) <- c( "Food Secure", "Food Secure", "Food Insecure", "Food Insecure")
 ```
   
 ##1 :High Food Security, 2 : Marginal Food Security , 3 : Low Food Security, 4  : Very Low Food Security ,-9 : No Response
@@ -47,15 +53,17 @@ summary(FS_Subset$'FoodSecurity_score')
 
 
 ```{r, results='markup', }
+ggplot(FS_Subset, aes(x= FoodSecurity_score,  y = ..prop.., group = 1)) + geom_bar( fill = "blue") +  geom_text(aes(label = round((..prop..), 2)), stat = "count", hjust = 0, colour = "black") + coord_flip() 
+
 df <- FS_Subset %>% 
-  group_by(FoodSecurity_score) %>% # Variable to be transformed
+  group_by(FS_Status) %>% # Variable to be transformed
   count() %>% 
   ungroup() %>% 
   mutate(perc = `n` / sum(`n`)) %>% 
   arrange(perc) %>%
   mutate(labels = scales::percent(perc))
 
-ggplot(df, aes(x = "", y = perc, fill = FoodSecurity_score)) +
+ggplot(df, aes(x = "", y = perc, fill = FS_Status)) +
   geom_col() +
     geom_text(aes(label = labels),
             position = position_stack(vjust = 0.5)) +
@@ -80,26 +88,27 @@ summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 ## Plotting barcharts between all the levels of each factor and food security status
 
 ```{r, results='markup'}
-table(FS_Subset$Ethnicity)
+
 for(i in levels(FS_Subset$Ethnicity)){
    
-  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
+  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge") ) 
 }
 ```
 ```{r, results='markup'}
 
-selected <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian', 'White-black', 'White-AI', 'White-Asian', 'White-HP', 'Black-AI', 'Black-Asian', 'Black-HP', 'AI-Asian', 'AI-HP', 'Asian-HP', 'W-B-AI', 'W-B-A', 'W-B-HP', 'W-AI-A', 'W-AI-HP', 'W-A-HP', 'B-AI-A', 'W-B-AL-A', 'W-AI-A-HP')
+selected <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian')
 
 FS_ss <- FS_Subset[FS_Subset$Ethnicity %in% selected,]
 
 FS_ss <- droplevels(FS_ss)
 
 
-chi_test <- table(FS_ss$Ethnicity, FS_ss$FoodSecurity_score)
-chi_test
-str(FS_ss)
+chi_test <- table(FS_ss$Ethnicity, FS_ss$FS_Status)
 chisq.test(chi_test)
+
+
 ```
+
 
 ```{r, results='markup'}
 for(i in levels(FS_Subset$Citizenship_status)){
@@ -109,10 +118,52 @@ for(i in levels(FS_Subset$Citizenship_status)){
 
 
 
+
+
+```
+
+```{r, results='markup'}
+chi_test_CS <- table(FS_ss$Citizenship_status, FS_ss$FoodSecurity_score)
+chisq.test(chi_test_CS)
 ```
 
 
+```{r, results='markup'}
 
+table(FS_Subset$SNAP)
+
+## Only would be considering the levels 1 and 2. here -1, the one with most frequency, means that the response is not in universe. Ideally, I should substitute this but due to time constraints I won't be doing that. -3 and -2 mean refuse to respond and no response.
+
+
+FS_SNAP <- subset(FS_Subset, FS_Subset$SNAP != -1)
+FS_SNAP <- droplevels(FS_SNAP)
+
+levels(FS_SNAP$SNAP) <- c('Refused', 'Dont Know', 'Uses SNAP', 'No SNAP')
+
+ggplot(FS_SNAP, aes(x = SNAP, fill = FoodSecurity_score)) + geom_bar(position = "fill")
+ggplot(FS_SNAP, aes(x = SNAP, fill = FS_Status)) + geom_bar(position = "fill")
+```
+
+```{r, results='markup'}
+chi_test_SNAP <- table(FS_SNAP$SNAP, FS_SNAP$FS_Status)
+chi_test_SNAP
+
+chisq.test(chi_test_SNAP)
+
+```
+
+
+```{r,results = 'markup'}
+table(FS_SNAP$SNAP)
+
+SNAP_Odds <- droplevels(subset(FS_SNAP, SNAP != "Refused" & SNAP != "Dont Know"))
+
+TAB <- table(SNAP_Odds$SNAP, SNAP_Odds$FS_Status)
+
+barplot(TAB, beside= T, legend = T)
+
+epi.2by2(TAB, method = "cohort.count")
+```
 ```{r data_ave, results='markup'}
 food_ave <- subset(FS_Subset, select = c("Id",	"Number_of_Jobs",	"Hours_on_Jobs",	"Education_Level", "FoodSecurity_score"))
 head(food_ave)
