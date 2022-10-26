@@ -53,8 +53,7 @@ levels(FS_Subset$FS_Status) <- c( "Food Secure", "Food Secure", "Food Insecure",
 
 
 ```{r, results='markup', }
-ggplot(FS_Subset, aes(x= FoodSecurity_score,  y = ..prop.., group = 1)) + geom_bar( fill = "blue") +  geom_text(aes(label = round((..prop..), 2)), stat = "count", hjust = 0, colour = "black") + coord_flip() 
-
+ggplot(FS_Subset, aes(x= FoodSecurity_score,  y = ..prop.., group = 1)) + geom_bar( fill = "blue") +  geom_text(aes(label = round((..prop..), 2)), stat = "count", hjust = 0, colour = "black") + coord_flip()  + labs(x= " ", y= "Relative Frequency ") +  scale_y_continuous(limits = c(0, 1))
 df <- FS_Subset %>% 
   group_by(FS_Status) %>% # Variable to be transformed
   count() %>% 
@@ -91,9 +90,12 @@ summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 
 for(i in levels(FS_Subset$Ethnicity)){
    
-  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge") ) 
+  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge") + labs(x= " ", y= "Percentage "))
+
 }
 ```
+
+
 ```{r, results='markup'}
 
 selected <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian')
@@ -113,7 +115,7 @@ chisq.test(chi_test)
 ```{r, results='markup'}
 for(i in levels(FS_Subset$Citizenship_status)){
    
-  print(ggplot(subset(FS_Subset, Citizenship_status == i ) , aes(x= Citizenship_status, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
+  print(ggplot(subset(FS_Subset, Citizenship_status == i ) , aes(x= Citizenship_status, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge")+ labs(x= " ", y= "Percentage "))
 }
 
 
