@@ -4,7 +4,11 @@ getwd()
 
 ## Installng tidyverse to use dplyr to rename the columns
 install.packages('tidyverse')
+
+```{r}
 Food_Sec <- data.frame(read.csv("dec21pub.csv"))
+```
+
 ```{r}
 library(dplyr)
 library(ezids)
