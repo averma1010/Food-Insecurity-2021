@@ -134,7 +134,7 @@ chisq.test(FS_Subset$Citizenship_status, FS_Subset$FoodSecurity_score)
 
 ```{r, results='markup'}
 
-table(FS_SNAP$SNAP, FS_SNAP$FoodSecurity_score)
+
 
 ## Only would be considering the levels 1 and 2. here -1, the one with most frequency, means that the response is not in universe. Ideally, I should substitute this but due to time constraints I won't be doing that. -3 and -2 mean refuse to respond and no response.
 
@@ -144,7 +144,7 @@ FS_SNAP <- droplevels(FS_SNAP)
 
 levels(FS_SNAP$SNAP) <- c('Refused', 'Dont Know', 'Uses SNAP', 'No SNAP')
 
-
+table(FS_SNAP$SNAP, FS_SNAP$FoodSecurity_score)
 
 ggplot(FS_SNAP, aes(x = SNAP, fill = FoodSecurity_score)) + geom_bar(position = "fill") + labs( x = " " , y = " ")
 ggplot(FS_SNAP, aes(x = SNAP, fill = FS_Status)) + geom_bar(position = "fill") + labs( x = " " ,y = " ")
