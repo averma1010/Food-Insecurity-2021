@@ -66,7 +66,7 @@ ggplot(df, aes(x = "", y = perc, fill = FS_Status)) +
   geom_col() +
     geom_text(aes(label = labels),
             position = position_stack(vjust = 0.5)) +
-  coord_polar(theta = "y")
+  coord_polar(theta = "y") + labs(x= " ", y= " ")
 
 
 
@@ -87,10 +87,11 @@ summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 ## Plotting barcharts between all the levels of each factor and food security status
 
 ```{r, results='markup'}
+table(FS_Subset$Ethnicity, FS_Subset$FoodSecurity_score)
 
 for(i in levels(FS_Subset$Ethnicity)){
    
-  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge") + labs(x= " ", y= "Percentage "))
+  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FS_Status, fill = FS_Status)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge") + labs(x= " ", y= "Percentage "))
 
 }
 ```
@@ -98,7 +99,7 @@ for(i in levels(FS_Subset$Ethnicity)){
 
 ```{r, results='markup'}
 
-selected <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian')
+selected <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian', 'White-black', 'White-AI', 'White-Asian', 'White-HP', 'Black-AI')
 
 FS_ss <- FS_Subset[FS_Subset$Ethnicity %in% selected,]
 
@@ -106,33 +107,34 @@ FS_ss <- droplevels(FS_ss)
 
 
 chi_test <- table(FS_ss$Ethnicity, FS_ss$FS_Status)
+chi_test
 chisq.test(chi_test)
-
+fisher.test(FS_Subset$Ethnicity, FS_Subset$FoodSecurity_score, simulate.p.value=TRUE)
 
 ```
 
 
 ```{r, results='markup'}
+table(FS_Subset$Citizenship_status, FS_Subset$FoodSecurity_score)
+
 for(i in levels(FS_Subset$Citizenship_status)){
    
-  print(ggplot(subset(FS_Subset, Citizenship_status == i ) , aes(x= Citizenship_status, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge")+ labs(x= " ", y= "Percentage "))
+  print(ggplot(subset(FS_Subset, Citizenship_status == i ) , aes(x= Citizenship_status, color =FS_Status, fill = FS_Status)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge")+ labs(x= " ", y= "Percentage "))
 }
 
 
 
 
-
 ```
 
 ```{r, results='markup'}
-chi_test_CS <- table(FS_ss$Citizenship_status, FS_ss$FoodSecurity_score)
-chisq.test(chi_test_CS)
+chisq.test(FS_Subset$Citizenship_status, FS_Subset$FoodSecurity_score)
 ```
 
 
 ```{r, results='markup'}
 
-table(FS_Subset$SNAP)
+table(FS_SNAP$SNAP, FS_SNAP$FoodSecurity_score)
 
 ## Only would be considering the levels 1 and 2. here -1, the one with most frequency, means that the response is not in universe. Ideally, I should substitute this but due to time constraints I won't be doing that. -3 and -2 mean refuse to respond and no response.
 
@@ -142,8 +144,10 @@ FS_SNAP <- droplevels(FS_SNAP)
 
 levels(FS_SNAP$SNAP) <- c('Refused', 'Dont Know', 'Uses SNAP', 'No SNAP')
 
-ggplot(FS_SNAP, aes(x = SNAP, fill = FoodSecurity_score)) + geom_bar(position = "fill")
-ggplot(FS_SNAP, aes(x = SNAP, fill = FS_Status)) + geom_bar(position = "fill")
+
+
+ggplot(FS_SNAP, aes(x = SNAP, fill = FoodSecurity_score)) + geom_bar(position = "fill") + labs( x = " " , y = " ")
+ggplot(FS_SNAP, aes(x = SNAP, fill = FS_Status)) + geom_bar(position = "fill") + labs( x = " " ,y = " ")
 ```
 
 ```{r, results='markup'}
@@ -156,11 +160,10 @@ chisq.test(chi_test_SNAP)
 
 
 ```{r,results = 'markup'}
-table(FS_SNAP$SNAP)
-
 SNAP_Odds <- droplevels(subset(FS_SNAP, SNAP != "Refused" & SNAP != "Dont Know"))
 
 TAB <- table(SNAP_Odds$SNAP, SNAP_Odds$FS_Status)
+TAB
 
 barplot(TAB, beside= T, legend = T)
 
