@@ -169,6 +169,7 @@ barplot(TAB, beside= T, legend = T)
 
 epi.2by2(TAB, method = "cohort.count")
 ```
+
 ```{r data_ave, results='markup'}
 food_ave <- subset(FS_Subset, select = c("Id",	"Number_of_Jobs",	"Hours_on_Jobs",	"Education_Level", "FoodSecurity_score"))
 head(food_ave)
@@ -398,18 +399,32 @@ h_tuskey
 ```
 
 2 - 1, 3 -1, 4 -1, 3 -2, 4 -2 have significant difference in there mean.
+getmode(food_ave$Hours_on_Jobs)
+
+```{r}
+ggplot(food_ave, aes(x=FoodSecurity_score, y=Hours_on_Jobs)) + 
+  geom_boxplot( colour=c("red","blue","violet","navy blue","black"), outlier.shape=8, outlier.size=4) +
+  labs(title="Boxplot for Hours on Jobs", x="Control / Treatment", y = "Hours on Job")
+```
+
+
+There are `r nrow(food_ave[food_ave$Hours_on_Jobs == -4,])` whose working hours vary. 
+summary(food_ave$Hours_on_Jobs)
 
 >>>>>>> 8657d5728a00f036f19d3ba04f8e0d67a4b3431f
 
+
 -***States, Family size, and Household Income***
-There are `r nrow(food_ave[food_ave$Hours_on_Jobs == -4,])` whose working hours vary. 
 
 ```{r, results='markup'}
 levels(FS_Subset$'States') <- c('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY' )
 summary(FS_Subset$'States', title = "GESTFIPS")
 
 ```
-summary(food_ave$Hours_on_Jobs)
+
+California has the highest number of respondents (6975), whereas Maine has the smallest number of respondents (564). 
+In order to compare, I'm choosing states which has similar number of respondents. 
+Alabama 1207 and Washington DC 1207, Florida 2738 and New York 2580, IL 2052 and PA 1928. 
 
 ## Plotting barcharts between all the levels of state and food security status
 
@@ -417,48 +432,24 @@ summary(food_ave$Hours_on_Jobs)
 for(i in levels(FS_Subset$States)){
    
   print(ggplot(subset(FS_Subset, States == i ) , aes(x= States, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
-getmode <- function(v) {
-   uniqv <- unique(v)
-   uniqv[which.max(tabulate(match(v, uniqv)))]
 }
-getmode(food_ave$Hours_on_Jobs)
-```
-```{r}
-ggplot(food_ave, aes(x=FoodSecurity_score, y=Hours_on_Jobs)) + 
-  geom_boxplot( colour=c("red","blue","violet","navy blue","black"), outlier.shape=8, outlier.size=4) +
-  labs(title="Boxplot for Hours on Jobs", x="Control / Treatment", y = "Hours on Job")
 ```
 
-<<<<<<< HEAD
-```{r, results='markup'}
-childless_fam<-subset(Food_Sec, PRNMCHLD==0, select = c(HRHHID, PRNMCHLD))
-childless_fam<-subset(FS_Subset, PRNMCHLD==0, select = c(HRHHID, PRNMCHLD))
-
-#library(ggplot2)
-qqplot(childless_fam, FS_Subset$FoodSeurity_Score, plot.it = TRUE,  xlab="Childless family", ylab="Food security Score",  main="Childless families' food security score")
-
-ggplot(childless_fam, aes(y=food_una$FoodSeurity_Score)) + 
-  geom_boxplot() + 
-  geom_boxplot( colour="orange", fill="#7777cc") +
-  labs(title="Baseball player weight boxplot using `ggplot`",x="", y = "weight (lbs)")
-  geom_boxplot( colour="orange", fill="#7777cc") 
-```
 
 ```{r data_una, results='markup'}
-food_una <- subset(food_final, select = c("HRHHID",	"GESTFIPS", "HRNUMHOU",	"HEFAMINC", "HRFS12MD"))
-food_una <- subset(FS_Subset, select = c("Id", "States","Family_Size","Household_Income","FoodSecurity_score", "Number_of_Children"))
+library(ggplot2)
+#qqplot(food_una$States, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="States", ylab="Food security Score",  main="QQ Plot for Food security vs States")
+hist(x=States, )
+```
+<<<<<<< HEAD
+
+
+
+```{r data_una, results='markup'}
+#food_una <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS", "HRNUMHOU",	"HEFAMINC", "HRFS12MD"))
+food_una <- subset(FS_Subset, select = c("Id", "States","Family_Size","Household_Income","FoodSecurity_score", "PRNMCHLD"))
 head(food_una)
 
-```
-
-
-```{r data_una, results='markup'}
-ok_state<-subset(FS_Subset, States=="40")
-me_state<-subset(FS_Subset, States=="23")
-table(ok_state$Household_Income)
-sum(table(ok_state$Household_Income))
-table(me_state$Household_Income)
-sum(table(me_state$Household_Income))
 ```
 
 Reference to household income: 
@@ -485,10 +476,25 @@ chisq.test(income_t)
 ```
 We can say that Household income is affecting food insecurity. 
 
+```{r}
+family_t <- table(FS_Subset$Family_Size, FS_Subset$FoodSecurity_score)
+chisq.test(family_t)
+```
+We can say that Family size is affecting food insecurity. 
+
+```{r data_una, results='markup'}
+
+boxplot(FoodSecurity_score ~ Family_Size, data = food_una, col=c("blue", "red", "green", "yellow", "purple", "orange"), main="Family size - Food security")
+boxplot(FoodSecurity_score ~ Household_Income, data = food_una, col=c("blue", "red", "green", "yellow", "purple", "orange"), main="Household Income - Food security")
+boxplot(FoodSecurity_score ~ States, data = food_una, col=c("blue", "red", "green", "yellow", "purple", "orange"))
+
+```
+As you can see from the boxplot, whenever family size bigger (more than 6 people), food insecurity is high. 
+Also, household income has direct effect on food security. When household income is higher than 40k, food security score is low. 
+
 ```{r data_una, results='markup'}
 library(ggplot2)
-qqplot(food_una$Household_Income, food_una$FoodSeurity_Score, plot.it = TRUE,  xlab="Household income", ylab="Food security Score",  col=food_una$States, main="QQ Plot for Food security vs Household income")
-qqplot(food_una$Household_Income, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="Household income", ylab="Food security Score", main="QQ Plot for Food security vs Household income")
+qqplot(food_una$Household_Income, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="Household income", ylab="Food security Score",  col=food_una$Household_Income, main="QQ Plot for Food security vs Household income")
 
 ```
 
@@ -500,15 +506,23 @@ summary(FS_Subset$Family_Size)
 
 ```{r data_una, results='markup'}
 library(ggplot2)
-qqplot(food_una$Family_Size, food_una$FoodSeurity_Score, plot.it = TRUE,  xlab="Family size", ylab="Food security Score",  col=food_una$Family_Size, main="QQ Plot for Food security vs Family")
-qqplot(food_una$Family_Size, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="Family size", ylab="Food security Score", main="QQ Plot for Food security vs Family")
+qqplot(food_una$Family_Size, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="Family size", ylab="Food security Score",  col=food_una$Family_Size, main="QQ Plot for Food security vs Family")
+
+```
+```{r data_una, results='markup'}
+
+ggplot(data=food_una, mapping = aes(x = Family_Size, y = FoodSecurity_score)) + 
+  geom_point(size=5)+aes(color = Family_Size) +
+  theme_bw()
 
 ```
 
 ```{r data_una, results='markup'}
 
 ggplot(data=food_una, mapping = aes(x = Family_Size, y = FoodSecurity_score)) + 
-  geom_point(aes(color = Household_Income)) +
+  geom_point(size=5)+aes(color = Household_Income) +
   theme_bw()
 
 ```
+
+
