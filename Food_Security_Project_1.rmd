@@ -32,7 +32,7 @@
 ***
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, cache=TRUE }
 Food_Sec <- data.frame(read.csv("dec21pub.csv"))
 ```
 
@@ -63,7 +63,20 @@ str(FS_Subset)
 ```
 
 
-##Exploring the Food Security Score
+**Coming to our Response Variable, Food Security** 
+
+***
+  
+**High Food Security**:  No reported indications of food-access problems or limitations.
+
+
+**Marginal Food Security**:  One or two reported signs, usually anxiety over food availability or scarcity in the home. There is little to no evidence that diets or food intake have changed.  
+
+**Low Food Security**:  One or two reported signs, usually indicating worry about food scarcity or insufficiency at home. Little to no evidence of dietary or food intake changes.  
+
+**Very Low Food Security**:  Reports of numerous signs of altered eating habits and decreased food intake.  
+
+***
 
 ```{r, results='markup', echo=FALSE}
 levels(FS_Subset$'FoodSecurity_score') <- c( "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
@@ -74,15 +87,12 @@ FS_Subset$FS_Status <- FS_Subset$FoodSecurity_score
 
 levels(FS_Subset$FS_Status) <- c( "Food Secure", "Food Secure", "Food Insecure", "Food Insecure")
 ```
-  
-##1 :High Food Security, 2 : Marginal Food Security , 3 : Low Food Security, 4  : Very Low Food Security ,-9 : No Response
-## Children’s Food Security Scale variables are coded as “Not in Universe” (-1) if there were no children in the household. 
-## Attachment 17, on page 288, contains details about the food security score. I have only given it a cursory glace, but we will have to read it in detail.
 
 
 
 
-```{r, results='markup', echo=FALSE }
+
+```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
 ggplot(FS_Subset, aes(x= FoodSecurity_score,  y = ..prop.., group = 1)) + geom_bar( fill = "blue") +  geom_text(aes(label = round((..prop..), 2)), stat = "count", hjust = 0, colour = "black") + coord_flip()  + labs(x= " ", y= "Relative Frequency ") +  scale_y_continuous(limits = c(0, 1))
 df <- FS_Subset %>% 
   group_by(FS_Status) %>% # Variable to be transformed
