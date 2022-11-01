@@ -127,7 +127,11 @@ summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 
 ### Ethnicity
 
+***
+
 * We have 25 Ethnicities in this Data. We will explore the relationship between Ethnicity and Food Security graphically, and do some statistical testing to confrim the said relationship
+
+***
 
 ##### Plotting barcharts between all types of Ethinicity and food security status
 
@@ -171,7 +175,11 @@ fisher.test(FS_Subset$Ethnicity, FS_Subset$FoodSecurity_score, simulate.p.value=
 
 ### Citizenship
 
+***
+
 * We have 5 levels of Citizenship status in this Data. We will explore the relationship between Citizenship and Food Security graphically, and do some statistical testing to confrim the said relationship
+
+***
 
 ##### Plotting barcharts between different Citizenship status's and food security status
 
@@ -214,10 +222,13 @@ chisq.test(FS_Subset$Citizenship_status, FS_Subset$FoodSecurity_score)
 
 ### SNAP
 
+***
+
 * SNAP Stands for Supplemental Nutrition Assistance Program
 * SNAP factor had 5 levels to in this dataset
 * We have dropped a level which indicated that the observations are not in universe
 
+***
 
 ##### Plotting Stacked barcharts between SNAP status and food security status
 
