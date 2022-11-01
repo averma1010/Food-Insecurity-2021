@@ -1,12 +1,28 @@
 # Topic : An Analysis of Food Security in USA - 2021
 
-
+***
 
 #### Our team’s research topic is the situation of food security in 2021.  We want to know how different demographic and socioeconomic factors relate to food security. 
 
 *We are using the Current Population Survey - Food Security Supplement Dec 2021 data provided by the US Census Bureau*
 
 *The Dataset contains 507 variables and roughly 120,000 observations*
+
+*** 
+
+##### The Smart Question we have proposed and hope to answer are
+
+**Specific**:- To study the specific pattern shown in the data that affects food security such as states, counties, income level, whether the family uses SNAP, race, immigrant status, work status, education level and many more demographic, socio-economic variables.  
+
+**Measurable**: Use EDA techniques to know how significantly different factors contribute to food insecurity.  
+
+**Achievable**: Can find variables which are significantly affecting food insecurity and can create models for ensuring food security in households.  
+
+**Relevant**: Food being the basic requirement of any human, this study can shed light on what the authorities and we ourselves can do in order to eradicate food insecurity.  
+
+**Time-oriented**: Data set for the month of December 2021 is considered for the study so that it can also show the effect of Covid-19 in food security.  
+*** 
+
 
 ```{r, echo=FALSE}
 Food_Sec <- data.frame(read.csv("dec21pub.csv"))
