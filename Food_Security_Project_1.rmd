@@ -21,7 +21,15 @@
 **Relevant**: Food being the basic requirement of any human, this study can shed light on what the authorities and we ourselves can do in order to eradicate food insecurity.  
 
 **Time-oriented**: Data set for the month of December 2021 is considered for the study so that it can also show the effect of Covid-19 in food security.  
+
 *** 
+
+*Considering the Questions we are asking, we have decided to select just 11 factors to work on* 
+
+*A very significant limitation to our data is that we have trimmed off a lot of observations where either the interview was not taken or not completed.  Ideally we should account for these observations somehow, but due to time constraints we aren't doing that*
+
+
+***
 
 
 ```{r, echo=FALSE}
