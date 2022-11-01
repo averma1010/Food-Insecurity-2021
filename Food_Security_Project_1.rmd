@@ -78,7 +78,7 @@ str(FS_Subset)
 
 ***
 
-```{r, results='markup', echo=FALSE}
+```{r, results='markup', echo=FALSE, results='hide'}
 levels(FS_Subset$'FoodSecurity_score') <- c( "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
 summary(FS_Subset$'FoodSecurity_score')
 
@@ -112,8 +112,8 @@ ggplot(df, aes(x = "", y = perc, fill = FS_Status)) +
 
 ```
 
-## Renaming levels of Ethnicity and Citizenship_Status
-```{r, results='markup', echo=FALSE}
+
+```{r, results='markup', echo=FALSE, results='hide'}
 levels(FS_Subset$'Ethnicity') <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian', 'White-black', 'White-AI', 'White-Asian', 'White-HP', 'Black-AI', 'Black-Asian', 'Black-HP', 'AI-Asian', 'AI-HP', 'Asian-HP', 'W-B-AI', 'W-B-A', 'W-B-HP', 'W-AI-A', 'W-AI-HP', 'W-A-HP', 'B-AI-A', 'W-B-AL-A', 'W-AI-A-HP', 'Other 3 race combo', 'Other 4 and 5 race combo')
 summary(FS_Subset$'Ethnicity', title = "PTDTRACE")
 
@@ -124,11 +124,17 @@ summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 
 
 ```
-## Plotting barcharts between all the levels of each factor and food security status
 
-```{r, results='markup', echo=FALSE}
+### Ethnicity
 
-table(FS_Subset$Ethnicity, FS_Subset$FoodSecurity_score)
+* We have 25 Ethnicities in this Data. We will explore the relationship between Ethnicity and Food Security graphically, and do some statistical testing to confrim the said relationship
+
+##### Plotting barcharts between all types of Ethinicity and food security status
+
+```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+
+
+FS_Subset$Ethnicity <- droplevels(FS_Subset$Ethnicity)
 
 for(i in levels(FS_Subset$Ethnicity)){
    
@@ -136,7 +142,18 @@ for(i in levels(FS_Subset$Ethnicity)){
 
 }
 ```
+#### Statistical Testing
 
+***
+
+* We are going to be Using Fisher’s Exact Test instead of Chi-square test because of the numerous levels with low frequency of observations
+
+* Our Null Hypothesis is that Ethnicity and Food Security Status are Independent of each other.
+
+* Taking our alpha to be 5%
+
+
+***
 
 ```{r, results='markup', echo=FALSE}
 
@@ -145,10 +162,20 @@ fisher.test(FS_Subset$Ethnicity, FS_Subset$FoodSecurity_score, simulate.p.value=
 
 ```
 
+***
 
-```{r, results='markup', echo=FALSE}
+* Since, the P-Value is less than our taken alpha we can say that there is a statistically significant relationship between Ethnicity and Food Security
 
-table(FS_Subset$Citizenship_status, FS_Subset$FoodSecurity_score)
+***
+
+
+### Citizenship
+
+* We have 5 levels of Citizenship status in this Data. We will explore the relationship between Citizenship and Food Security graphically, and do some statistical testing to confrim the said relationship
+
+##### Plotting barcharts between different Citizenship status's and food security status
+
+```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
 
 for(i in levels(FS_Subset$Citizenship_status)){
    
@@ -160,12 +187,41 @@ for(i in levels(FS_Subset$Citizenship_status)){
 
 ```
 
+
+#### Statistical Testing
+
+***
+
+* We are Chi-square test
+
+* Our Null Hypothesis is that Citizenship Status and Food Security Status are Independent of each other.
+
+* Taking our alpha to be 5%
+
+
+***
+
 ```{r, results='markup', echo=FALSE}
 chisq.test(FS_Subset$Citizenship_status, FS_Subset$FoodSecurity_score)
 ```
 
 
-```{r, results='markup', echo=FALSE}
+***
+
+* Since, the P-Value is less than our taken alpha we can say that there is a statistically significant relationship between Citizenship Status and Food Security
+
+***
+
+### SNAP
+
+* SNAP Stands for Supplemental Nutrition Assistance Program
+* SNAP factor had 5 levels to in this dataset
+* We have dropped a level which indicated that the observations are not in universe
+
+
+##### Plotting Stacked barcharts between SNAP status and food security status
+
+```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
 
 
 
@@ -177,31 +233,61 @@ FS_SNAP <- droplevels(FS_SNAP)
 
 levels(FS_SNAP$SNAP) <- c('Refused', 'Dont Know', 'Uses SNAP', 'No SNAP')
 
-table(FS_SNAP$SNAP, FS_SNAP$FoodSecurity_score)
+
 
 ggplot(FS_SNAP, aes(x = SNAP, fill = FoodSecurity_score)) + geom_bar(position = "fill") + labs( x = " " , y = " ")
 ggplot(FS_SNAP, aes(x = SNAP, fill = FS_Status)) + geom_bar(position = "fill") + labs( x = " " ,y = " ")
 ```
 
+#### Statistical Testing
+
+***
+
+* We are Chi-square test
+
+* Our Null Hypothesis is that SNAP Status and Food Security Status are Independent of each other.
+
+* Taking our alpha to be 5%
+
+
+***
+
+
 ```{r, results='markup', echo=FALSE}
 chi_test_SNAP <- table(FS_SNAP$SNAP, FS_SNAP$FS_Status)
-chi_test_SNAP
+
 
 chisq.test(chi_test_SNAP)
 
 ```
+***
 
+* Since, the P-Value is less than our taken alpha we can say that there is a statistically significant relationship between SNAP Status and Food Security
+
+***
+
+
+#### Odds Ratio
 
 ```{r,results = 'markup', echo=FALSE}
 SNAP_Odds <- droplevels(subset(FS_SNAP, SNAP != "Refused" & SNAP != "Dont Know"))
 
 TAB <- table(SNAP_Odds$SNAP, SNAP_Odds$FS_Status)
-TAB
+
 
 barplot(TAB, beside= T, legend = T)
 
 epi.2by2(TAB, method = "cohort.count")
 ```
+***
+
+* The Odds ratio is 0.46, with a 95% Confidence Interval
+* This means that the odds of a person not on SNAP to be food secure is 2.17 times the odds of person on SNAP to be food secure.
+
+
+
+***
+
 
 ```{r data_ave, results='markup', echo=FALSE}
 food_ave <- subset(FS_Subset, select = c("Id",	"Number_of_Jobs",	"Hours_on_Jobs",	"Education_Level", "FoodSecurity_score"))
