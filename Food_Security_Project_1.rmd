@@ -103,7 +103,7 @@ levels(FS_Subset$FS_Status) <- c( "Food Secure", "Food Secure", "Food Insecure",
 
 
 
-```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 ggplot(FS_Subset, aes(x= FoodSecurity_score,  y = ..prop.., group = 1)) + geom_bar( fill = "blue") +  geom_text(aes(label = round((..prop..), 2)), stat = "count", hjust = 0, colour = "black") + coord_flip()  + labs(x= " ", y= "Relative Frequency ") +  scale_y_continuous(limits = c(0, 1))
 df <- FS_Subset %>% 
   group_by(FS_Status) %>% # Variable to be transformed
@@ -146,7 +146,7 @@ summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 
 ##### Plotting barcharts between all types of Ethinicity and food security status
 
-```{r, results='markup', echo=FALSE, out.width="25%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="25%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 
 
 FS_Subset$Ethnicity <- droplevels(FS_Subset$Ethnicity)
@@ -196,7 +196,7 @@ fisher.test(FS_Subset$Ethnicity, FS_Subset$FoodSecurity_score, simulate.p.value=
 
 ##### Plotting barcharts between different Citizenship status's and food security status
 
-```{r, results='markup', echo=FALSE, out.width="20%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="20%", out.height="30%",fig.cap=" ",fig.show='hold',fig.align='center'}
 
 for(i in levels(FS_Subset$Citizenship_status)){
    
@@ -245,7 +245,7 @@ chisq.test(FS_Subset$Citizenship_status, FS_Subset$FoodSecurity_score)
 
 ##### Plotting Stacked barcharts between SNAP status and food security status
 
-```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 
 
 
@@ -345,14 +345,14 @@ food_ave$Hours_on_Jobs = as.numeric(food_ave$Hours_on_Jobs)
 
 ***
 
-#### Number of Jobs
+### Number of Jobs
 
 ***
 
 Now we conduct an in-depth EDA on the **Number of Jobs of the respondents**
 
 ***
-```{r no_of_jobs, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r no_of_jobs, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 plot(food_ave$Number_of_Jobs)
 ggplot(food_ave) +
   geom_bar(aes(x = Number_of_Jobs, fill = FoodSecurity_score), position = "dodge") +
@@ -367,13 +367,13 @@ This hides the proper analysis of the responses. Hence we remove the Not Applica
 
 ***
 
-```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 
 ```
 
 
 
-```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 food_noj <- subset(food_ave, food_ave$Number_of_Jobs != 'Not Applicable')
 ggplot(food_noj, aes(x = Number_of_Jobs, fill = FoodSecurity_score)) + geom_bar(position = "fill") + labs( x = " " , y = " ", title = "Food Security Score on Number of Jobs")
 
@@ -403,7 +403,7 @@ food_num <- droplevels(subset(food_ave, Number_of_Jobs != "Not Applicable" ))
 ```
 
 
-```{r, results='markup',warning=FALSE, echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup',warning=FALSE, echo=FALSE, out.width="35%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 contable_number_of_jobs <- table(food_num$Number_of_Jobs, food_num$FoodSecurity_score)
 
 
@@ -445,7 +445,7 @@ The frequency table gave us an outline about the sample we are using. Most of th
 Now even though the frequency table showed us with a majority educated sample, the food security score of the people still need to be studied. The initial tool that we can use for this study is graphical representation.
 
 ***
-```{r , results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r , results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 plot(food_edu$Education_Level)
 ggplot(food_edu) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
@@ -502,7 +502,7 @@ The above results shows that the range of responses were between 1 and 88. Thoug
 ***
 
 
-```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 ggplot(food_hoj, aes(Hours_on_Jobs, fill = FoodSecurity_score)) + 
         geom_histogram(binwidth=5)
 ggplot(food_hoj, aes(Hours_on_Jobs)) + 
@@ -513,7 +513,7 @@ ggplot(food_hoj, aes(Hours_on_Jobs, color= FoodSecurity_score)) +
 ```
 
 
-```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="50%", out.height="25%",fig.cap=" ",fig.show='hold',fig.align='center'}
 
 ggplot(food_hoj, aes(Hours_on_Jobs, fill = FoodSecurity_score)) + 
         geom_histogram(binwidth=5) + 
@@ -526,7 +526,7 @@ The above graphs clearly depicts the distribution of data on this variable.
 The following is a bargraph for the same variable.
 
 ***
-```{r,results='markup',echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r,results='markup',echo=FALSE, out.width="35%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 ggplot(food_hoj, aes(x=FoodSecurity_score, y=Hours_on_Jobs)) + 
   geom_boxplot( colour=c("blue","violet","navy blue","black"), outlier.shape=8, outlier.size=4) +
   labs(title="Boxplot for Hours on Jobs", x="Control / Treatment", y = "Hours on Job")
@@ -537,7 +537,7 @@ Further on the Post-Hoc test verifies which groups have differences.
 
 ***
 
-```{r, results='markup', warning=FALSE, echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', warning=FALSE, echo=FALSE, out.width="35%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 h_anova <- aov(Hours_on_Jobs ~ FoodSecurity_score, data = food_hoj)
 h_tuskey <- TukeyHSD(h_anova)
 summary(h_anova)
@@ -566,7 +566,7 @@ We wanted to check whether State variable has impact on Food security or not. Ho
 
 #### Plotting barcharts between some states and food security status
 
-```{r,  echo=FALSE, out.width="25%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r,  echo=FALSE, out.width="25%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 a = 0
 for(i in levels(FS_Subset$States)){
 
@@ -582,7 +582,7 @@ for(i in levels(FS_Subset$States)){
 
 
 
-```{r, results='hide', echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='hide', echo=FALSE, out.width="35%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 #food_una <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS", "HRNUMHOU",	"HEFAMINC", "HRFS12MD"))
 food_una <- subset(FS_Subset, select = c("Id", "States","Family_Size","Household_Income","FoodSecurity_score", "PRNMCHLD"))
 head(food_una)
@@ -611,7 +611,7 @@ We can say that Family size is affecting food insecurity. When family size gets 
 
 
 ***
-```{r, results='markup', echo=FALSE, out.width="25%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="25%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 
 boxplot(FoodSecurity_score ~ Family_Size, data = food_una, col=c("blue", "red", "green", "yellow", "purple", "orange"), main="Family size - Food security")
 boxplot(FoodSecurity_score ~ Household_Income, data = food_una, col=c("blue", "red", "green", "yellow", "purple", "orange"), main="Household Income - Food security")
@@ -623,7 +623,7 @@ As you can see from the boxplot, whenever family size bigger (more than 6 people
 Also, household income has direct effect on food security. When household income is higher than 40k, food security score is low.
 
 ***
-```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 
 qqplot(food_una$Household_Income, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="Household income", ylab="Food security Score",  col=food_una$Household_Income, main="QQ Plot for Food security vs Household income")
 
@@ -635,7 +635,7 @@ summary(FS_Subset$Family_Size)
 ```
 
 
-```{r, results='markup', echo=FALSE, out.width="25%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="25%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
 
 qqplot(food_una$Family_Size, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="Family size", ylab="Food security Score",  col=food_una$Family_Size, main="QQ Plot for Food security vs Family")
 
