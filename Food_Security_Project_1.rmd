@@ -1,6 +1,13 @@
 # Topic : An Analysis of Food Security in USA - 2021
 
 ***
+### Introduction
+
+Although food is the basic human right, many people in the world are living in highly food insecure condition. According to World Bank, with the pandemic hit, domestic food price inflation increased at least by 5 percent globally. Also, according to the United Nations news, 828 million people were affected by hunger in 2021. It's important to analyse what factors are affecting food security and take measures to reduce world's hunger. This  the one of the reasons that we were interested to study food security in USA. 
+Although, there were limitations to our study. Food security is very complex issue, and needs multi-angle, thorough research. We've chosen only certain socio-economic variables out of 507 variables. 
+
+
+***
 
 #### Our team’s research topic is the situation of food security in 2021.  We want to know how different demographic and socioeconomic factors relate to food security. 
 
