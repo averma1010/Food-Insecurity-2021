@@ -602,6 +602,13 @@ ggplot(data=food_una, mapping = aes(x = Family_Size, y = FoodSecurity_score)) +
 
 ```
     
-  Interesting thing from this graph is that when family size ig bigger, household income is high and that family has high food security. When Family size and Household income are separate, they have significant relatioship with food security. However, when they are combined together, the result is different. For further analysis, we need to consider age and empoyment type of the family members. 
+Interesting thing from this graph is that when family size ig bigger, household income is high and that family has high food security. When Family size and Household income are separate, they have significant relatioship with food security. However, when they are combined together, the result is different. For further analysis, we need to consider age and employment type of the family members. 
 
+
+### Conclusion
+
+Ethnicity, Citizenship, participation in SNAP, Education level, Hours on work, Household income, Family size have significant relation with the Food Security Score. Out of all the chosen variables, these 7 variables showed a relation to food security. But keeping an open mind to possible errors in survey data, it is better to rule out other variables only aftter further studies. 
+
+### Future Scope
+The results from the study also shows that further analysis can come up with models to predict the food security score and hence it reveals the important sectors that officials should focus on in order to eradicate food insecurity. The initial results shows that 10% of the population are still food insecure in Inida, which accounts for about 33 million people. Food being the vary basic need of any living being, all should have access to safe and proper food. This signifies the result of the study and the further need of studies.
 
