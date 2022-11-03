@@ -47,7 +47,7 @@ Food_Sec <- data.frame(read.csv("dec21pub.csv"))
 
 ```{r, echo=FALSE, results='hide', message=FALSE}
 library(dplyr)
-#library(ezids)
+library(ezids)
 library(ggplot2)
 library(epiR)
 
@@ -513,10 +513,7 @@ levels(FS_Subset$'States') <- c('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 
 
 ```
 
-We wanted to check whether State variable has impact on Food security or not. However, because each State had different number of respondents, it was difficult to make analysis based on the State variable only. For example, California has the highest number of respondents (6975), whereas Maine has the smallest number of respondents (564). More than 10 times difference between these 2 States. 
-In order to compare, we've chosen states which has similar number of respondents. 
-Alabama 1207 versus Washington DC 1207,  Florida 2738 versus New York 2580, IL 2052 versus PA 1928. 
-Looking at th graphs, Alabama has more food insecurity than DC, Florida and New York has similar food security level as well as Illinois and Pennsylvania. 
+We wanted to check whether State variable has impact on Food security or not. However, because each State had different number of respondents, it was difficult to make analysis based on the State variable only. For example, California has the highest number of respondents (6975), whereas Maine has the smallest number of respondents (564). More than 10 times difference between these 2 States. In order to compare, we’ve chosen states which has similar number of respondents. Alabama 1207 versus Washington DC 1207, Florida 2738 versus New York 2580, IL 2052 versus PA 1928. Looking at th graphs, Alabama has more food insecurity than DC, Florida and New York has similar food security level as well as Illinois and Pennsylvania.
 
 ## Plotting barcharts between all the levels of state and food security status
 
@@ -552,13 +549,14 @@ Reference to household income:
 income_t <- table(FS_Subset$Household_Income, FS_Subset$FoodSecurity_score)
 chisq.test(income_t)
 ```
-We can say that Household income is affecting food insecurity. When Household income is less than 20000 dollars, it's more likely to have high food insecurity and, if the Household income is between 20000 and 40000,the families have low food security. 
+We can say that Household income is affecting food insecurity. When Household income is less than 20000 dollars, it’s more likely to have high food insecurity and, if the Household income is between 20000 and 40000,the families have low food security.
 
 ```{r, echo=FALSE}
 family_t <- table(FS_Subset$Family_Size, FS_Subset$FoodSecurity_score)
 chisq.test(family_t)
 ```
-We can say that Family size is affecting food insecurity. When family size gets bigger, it's more likely to have very low food security.
+We can say that Family size is affecting food insecurity. When family size gets bigger, it’s more likely to have very low food security.
+
 
 ```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
 
@@ -604,7 +602,7 @@ ggplot(data=food_una, mapping = aes(x = Family_Size, y = FoodSecurity_score)) +
 
 ```
     
-Interesting thing from this graph is that when family size ig bigger, household income is high and that family has high food security. When Family size and Household income are separate, they have significant relationship with food security. However, when they are combined together, the result is different. For further analysis, we need to consider age and employment type of the family members. 
+Interesting thing from this graph is that when family size ig bigger, household income is high and that family has high food security. When Family size and Household income are separate, they have significant relatioship with food security. However, when they are combined together, the result is different. For further analysis, we need to consider age and employment type of the family members. 
 
 
 ### Conclusion
