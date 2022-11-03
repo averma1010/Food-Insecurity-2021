@@ -46,7 +46,7 @@ library(epiR)
 
 ```
 
-```{r, results='markup', echo=FALSE}
+```{r, results='markup', echo=FALSE, cache=TRUE}
 
 
 FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001 & HRFS12MD != -9)
@@ -78,7 +78,7 @@ str(FS_Subset)
 
 ***
 
-```{r, results='markup', echo=FALSE, results='hide'}
+```{r, results='markup', echo=FALSE, results='hide', cache=TRUE}
 levels(FS_Subset$'FoodSecurity_score') <- c( "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
 summary(FS_Subset$'FoodSecurity_score')
 
@@ -113,7 +113,7 @@ ggplot(df, aes(x = "", y = perc, fill = FS_Status)) +
 ```
 
 
-```{r, results='markup', echo=FALSE, results='hide'}
+```{r, results='markup', echo=FALSE, results='hide',cache=TRUE}
 levels(FS_Subset$'Ethnicity') <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian', 'White-black', 'White-AI', 'White-Asian', 'White-HP', 'Black-AI', 'Black-Asian', 'Black-HP', 'AI-Asian', 'AI-HP', 'Asian-HP', 'W-B-AI', 'W-B-A', 'W-B-HP', 'W-AI-A', 'W-AI-HP', 'W-A-HP', 'B-AI-A', 'W-B-AL-A', 'W-AI-A-HP', 'Other 3 race combo', 'Other 4 and 5 race combo')
 summary(FS_Subset$'Ethnicity', title = "PTDTRACE")
 
@@ -135,7 +135,7 @@ summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 
 ##### Plotting barcharts between all types of Ethinicity and food security status
 
-```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="25%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
 
 
 FS_Subset$Ethnicity <- droplevels(FS_Subset$Ethnicity)
@@ -185,7 +185,7 @@ fisher.test(FS_Subset$Ethnicity, FS_Subset$FoodSecurity_score, simulate.p.value=
 
 ##### Plotting barcharts between different Citizenship status's and food security status
 
-```{r, results='markup', echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r, results='markup', echo=FALSE, out.width="20%", out.height="30%",fig.cap="caption",fig.show='hold',fig.align='center'}
 
 for(i in levels(FS_Subset$Citizenship_status)){
    
@@ -512,10 +512,16 @@ Alabama 1207 and Washington DC 1207, Florida 2738 and New York 2580, IL 2052 and
 
 ## Plotting barcharts between all the levels of state and food security status
 
-```{r,  echo=FALSE, out.width="35%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+```{r,  echo=FALSE, out.width="25%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+a = 0
 for(i in levels(FS_Subset$States)){
-   
+
+  
+  a = a+1
+ 
+ if(a%%7 == 1) {
   print(ggplot(subset(FS_Subset, States == i ) , aes(x= States, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
+}
 }
 ```
 
