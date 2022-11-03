@@ -596,9 +596,8 @@ ggplot(data=food_una, mapping = aes(x = Family_Size, y = FoodSecurity_score)) +
 
 ```
     
-Interesting thing from this graph is that when family size ig bigger, household income is high and that family has high food security. When Family size and Household income are separate, they have significant relatioship with food security. However, when they are combined together, the result is different. For further analysis, we need to consider age and empoyment type of the family members. 
+Interesting thing from this graph is that when family size ig bigger, household income is high and that family has high food security. When Family size and Household income are separate, they have significant relatioship with food security. However, when they are combined together, the result is different. For further analysis, we need to consider age and employment type of the family members. 
 
-```
 
 ### Conclusion
 
