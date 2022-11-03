@@ -3,10 +3,7 @@
 ***
 ### Introduction
 
-Although food is the basic human right, many people in the world are living in highly food insecure condition. 
-
-According to World Bank, with the pandemic hit, domestic food price inflation increased at least by 5 percent globally. Also, according to the United Nations news, 828 million people were affected by hunger in 2021. It's important to analyse what factors are affecting food security and take measures to reduce world's hunger. This  the one of the reasons that we were interested to study food security in USA. 
-
+  Although food is the basic human right, many people in the world are living in highly food insecure condition. According to World Bank, with the pandemic hit, domestic food price inflation increased at least by 5 percent globally. Also, according to the United Nations news, 828 million people were affected by hunger in 2021. It's important to analyse what factors are affecting food security and take measures to reduce world's hunger. This one of the reasons that we were interested to study food security in USA. 
 Although, there were limitations to our study. Food security is very complex issue, and needs multi-angle, thorough research. We've chosen only certain socio-economic variables out of 507 variables. 
 
 
@@ -667,8 +664,9 @@ Interesting thing from this graph is that when family size is bigger, household 
 ### Conclusion
 
 ***
-Ethnicity, Citizenship, participation in SNAP, Education level, Hours on work, Household income, Family size have significant relation with the Food Security Score. Out of all the chosen variables, these 7 variables showed a relation to food security. But keeping an open mind to possible errors in survey data, it is better to rule out other variables only after further studies. 
+  The aim of the study was to discuss the food insecurity that people still face in USA. The study was limited to nine variables. But the primary objective of the study was to understand how most important factors can affect the food security. Ethnicity, Citizenship, participation in SNAP, Education level, Hours on work, Household income, Family size have significant relation with the Food Security Score. Out of all the chosen variables, these 7 variables showed a relation to food security. But keeping an open mind to possible errors in survey data, it is better to rule out other variables only after further studies. There are hundreds of variable that still needs to be studied and which should be discussed. 
 
+  The United Nations sustainable development goals include eradication of hunger. Government should come up with possible solutions. But this doesn't make us not responsible for eradicating the Food insecurity. It's everyone's duty to build a society which is food secure.
 ***
 
 ### Future Scope
@@ -676,3 +674,13 @@ The results from the study also shows that further analysis can come up with mod
 The initial results shows that 10% of the population are still food insecure in the USA, which accounts for about 33 million people. Food being the vary basic need of any living being, all should have access to safe and proper food. This signifies the result of the study and the further need of studies. We hope that high quality data and thorough analysis will help to eradicate world hunger. 
 
 ***
+
+### References
+
+•	https://www2.census.gov/programs-surveys/cps/datasets/2021/supp/dec21pub.csv
+•	https://www.census.gov/data/datasets/time-series/demo/cps/cps-supp_cps-repwgt/cps-food-security.html
+•	https://www.ers.usda.gov/data-products/food-security-in-the-united-states/
+•	https://r4ds.had.co.nz/exploratory-data-analysis.html
+•	https://www.webpages.uidaho.edu/~stevel/519/How%20to%20get%20correlation%20between%20two%20categorical%20variable%20and%20a%20categorical%20variable%20and%20continuous%20variable.html
+•	http://statseducation.com/Introduction-to-R/modules/graphics/cont/
+•	https://www.tutorialspoint.com/r/r_mean_median_mode.htm
