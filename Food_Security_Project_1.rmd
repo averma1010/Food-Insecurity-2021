@@ -1,22 +1,52 @@
-## Hi, decided to call the data set Food_Sec, have loaded the entire data set and would then subset it to the columns we are working on.
-## There was one Raw_Data.csv file aswell that had done this already but that didn't have all the observations
-getwd()
-install.packages("epiR")
-## Installng tidyverse to use dplyr to rename the columns
-install.packages('tidyverse')
+# Topic : An Analysis of Food Security in USA - 2021
 
-```{r}
+***
+
+#### Our team’s research topic is the situation of food security in 2021.  We want to know how different demographic and socioeconomic factors relate to food security. 
+
+*We are using the Current Population Survey - Food Security Supplement Dec 2021 data provided by the US Census Bureau*
+
+*The Dataset contains 507 variables and roughly 120,000 observations*
+
+*** 
+
+##### The Smart Question we have proposed and hope to answer are
+
+**Specific**:- To study the specific pattern shown in the data that affects food security such as states, counties, income level, whether the family uses SNAP, race, immigrant status, work status, education level and many more demographic, socio-economic variables.  
+
+**Measurable**: Use EDA techniques to know how significantly different factors contribute to food insecurity.  
+
+**Achievable**: Can find variables which are significantly affecting food insecurity and can create models for ensuring food security in households.  
+
+**Relevant**: Food being the basic requirement of any human, this study can shed light on what the authorities and we ourselves can do in order to eradicate food insecurity.  
+
+**Time-oriented**: Data set for the month of December 2021 is considered for the study so that it can also show the effect of Covid-19 in food security.  
+
+*** 
+
+*Considering the Questions we are asking, we have decided to select just 11 factors to work on* 
+
+*A very significant limitation to our data is that we have trimmed off a lot of observations where either the interview was not taken or not completed.  Ideally we should account for these observations somehow, but due to time constraints we aren't doing that*
+
+
+***
+
+
+```{r, echo=FALSE, cache=TRUE }
 Food_Sec <- data.frame(read.csv("dec21pub.csv"))
 ```
 
-```{r}
+  
+
+```{r, echo=FALSE, results='hide', message=FALSE}
 library(dplyr)
 library(ezids)
 library(ggplot2)
 library(epiR)
+
 ```
 
-```{r, results='markup'}
+```{r, results='markup', echo=FALSE}
 
 
 FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001 & HRFS12MD != -9)
@@ -33,9 +63,22 @@ str(FS_Subset)
 ```
 
 
-##Exploring the Food Security Score
+**Coming to our Response Variable, Food Security** 
 
-```{r, results='markup'}
+***
+  
+**High Food Security**:  No reported indications of food-access problems or limitations.
+
+
+**Marginal Food Security**:  One or two reported signs, usually anxiety over food availability or scarcity in the home. There is little to no evidence that diets or food intake have changed.  
+
+**Low Food Security**:  One or two reported signs, usually indicating worry about food scarcity or insufficiency at home. Little to no evidence of dietary or food intake changes.  
+
+**Very Low Food Security**:  Reports of numerous signs of altered eating habits and decreased food intake.  
+
+***
+
+```{r, results='markup', echo=FALSE, results='hide'}
 levels(FS_Subset$'FoodSecurity_score') <- c( "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
 summary(FS_Subset$'FoodSecurity_score')
 
@@ -44,15 +87,12 @@ FS_Subset$FS_Status <- FS_Subset$FoodSecurity_score
 
 levels(FS_Subset$FS_Status) <- c( "Food Secure", "Food Secure", "Food Insecure", "Food Insecure")
 ```
-  
-##1 :High Food Security, 2 : Marginal Food Security , 3 : Low Food Security, 4  : Very Low Food Security ,-9 : No Response
-## Children’s Food Security Scale variables are coded as “Not in Universe” (-1) if there were no children in the household. 
-## Attachment 17, on page 288, contains details about the food security score. I have only given it a cursory glace, but we will have to read it in detail.
 
 
 
 
-```{r, results='markup', }
+
+```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
 ggplot(FS_Subset, aes(x= FoodSecurity_score,  y = ..prop.., group = 1)) + geom_bar( fill = "blue") +  geom_text(aes(label = round((..prop..), 2)), stat = "count", hjust = 0, colour = "black") + coord_flip()  + labs(x= " ", y= "Relative Frequency ") +  scale_y_continuous(limits = c(0, 1))
 df <- FS_Subset %>% 
   group_by(FS_Status) %>% # Variable to be transformed
@@ -66,14 +106,14 @@ ggplot(df, aes(x = "", y = perc, fill = FS_Status)) +
   geom_col() +
     geom_text(aes(label = labels),
             position = position_stack(vjust = 0.5)) +
-  coord_polar(theta = "y")
+  coord_polar(theta = "y") + labs(x= " ", y= " ")
 
 
 
 ```
 
-## Renaming levels of Ethnicity and Citizenship_Status
-```{r, results='markup'}
+
+```{r, results='markup', echo=FALSE, results='hide'}
 levels(FS_Subset$'Ethnicity') <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian', 'White-black', 'White-AI', 'White-Asian', 'White-HP', 'Black-AI', 'Black-Asian', 'Black-HP', 'AI-Asian', 'AI-HP', 'Asian-HP', 'W-B-AI', 'W-B-A', 'W-B-HP', 'W-AI-A', 'W-AI-HP', 'W-A-HP', 'B-AI-A', 'W-B-AL-A', 'W-AI-A-HP', 'Other 3 race combo', 'Other 4 and 5 race combo')
 summary(FS_Subset$'Ethnicity', title = "PTDTRACE")
 
@@ -84,55 +124,117 @@ summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
 
 
 ```
-## Plotting barcharts between all the levels of each factor and food security status
 
-```{r, results='markup'}
+### Ethnicity
+
+***
+
+* We have 25 Ethnicities in this Data. We will explore the relationship between Ethnicity and Food Security graphically, and do some statistical testing to confrim the said relationship
+
+***
+
+##### Plotting barcharts between all types of Ethinicity and food security status
+
+```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+
+
+FS_Subset$Ethnicity <- droplevels(FS_Subset$Ethnicity)
 
 for(i in levels(FS_Subset$Ethnicity)){
    
-  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge") + labs(x= " ", y= "Percentage "))
+  print(ggplot(subset(FS_Subset, Ethnicity == i ) , aes(x= Ethnicity, color =FS_Status, fill = FS_Status)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge") + labs(x= " ", y= "Percentage "))
 
 }
 ```
+#### Statistical Testing
+
+***
+
+* We are going to be Using Fisher’s Exact Test instead of Chi-square test because of the numerous levels with low frequency of observations
+
+* Our Null Hypothesis is that Ethnicity and Food Security Status are Independent of each other.
+
+* Taking our alpha to be 5%
 
 
-```{r, results='markup'}
+***
 
-selected <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian')
-
-FS_ss <- FS_Subset[FS_Subset$Ethnicity %in% selected,]
-
-FS_ss <- droplevels(FS_ss)
+```{r, results='markup', echo=FALSE}
 
 
-chi_test <- table(FS_ss$Ethnicity, FS_ss$FS_Status)
-chisq.test(chi_test)
-
+fisher.test(FS_Subset$Ethnicity, FS_Subset$FoodSecurity_score, simulate.p.value=TRUE)
 
 ```
 
+***
 
-```{r, results='markup'}
+* Since, the P-Value is less than our taken alpha we can say that there is a statistically significant relationship between Ethnicity and Food Security
+
+***
+
+
+### Citizenship
+
+***
+
+* We have 5 levels of Citizenship status in this Data. We will explore the relationship between Citizenship and Food Security graphically, and do some statistical testing to confrim the said relationship
+
+***
+
+##### Plotting barcharts between different Citizenship status's and food security status
+
+```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+
 for(i in levels(FS_Subset$Citizenship_status)){
    
-  print(ggplot(subset(FS_Subset, Citizenship_status == i ) , aes(x= Citizenship_status, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge")+ labs(x= " ", y= "Percentage "))
+  print(ggplot(subset(FS_Subset, Citizenship_status == i ) , aes(x= Citizenship_status, color =FS_Status, fill = FS_Status)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge")+ labs(x= " ", y= "Percentage "))
 }
 
 
 
 
-
-```
-
-```{r, results='markup'}
-chi_test_CS <- table(FS_ss$Citizenship_status, FS_ss$FoodSecurity_score)
-chisq.test(chi_test_CS)
 ```
 
 
-```{r, results='markup'}
+#### Statistical Testing
 
-table(FS_Subset$SNAP)
+***
+
+* We are Chi-square test
+
+* Our Null Hypothesis is that Citizenship Status and Food Security Status are Independent of each other.
+
+* Taking our alpha to be 5%
+
+
+***
+
+```{r, results='markup', echo=FALSE}
+chisq.test(FS_Subset$Citizenship_status, FS_Subset$FoodSecurity_score)
+```
+
+
+***
+
+* Since, the P-Value is less than our taken alpha we can say that there is a statistically significant relationship between Citizenship Status and Food Security
+
+***
+
+### SNAP
+
+***
+
+* SNAP Stands for Supplemental Nutrition Assistance Program
+* SNAP factor had 5 levels to in this dataset
+* We have dropped a level which indicated that the observations are not in universe
+
+***
+
+##### Plotting Stacked barcharts between SNAP status and food security status
+
+```{r, results='markup', echo=FALSE, out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+
+
 
 ## Only would be considering the levels 1 and 2. here -1, the one with most frequency, means that the response is not in universe. Ideally, I should substitute this but due to time constraints I won't be doing that. -3 and -2 mean refuse to respond and no response.
 
@@ -142,38 +244,82 @@ FS_SNAP <- droplevels(FS_SNAP)
 
 levels(FS_SNAP$SNAP) <- c('Refused', 'Dont Know', 'Uses SNAP', 'No SNAP')
 
-ggplot(FS_SNAP, aes(x = SNAP, fill = FoodSecurity_score)) + geom_bar(position = "fill")
-ggplot(FS_SNAP, aes(x = SNAP, fill = FS_Status)) + geom_bar(position = "fill")
+
+
+ggplot(FS_SNAP, aes(x = SNAP, fill = FoodSecurity_score)) + geom_bar(position = "fill") + labs( x = " " , y = " ")
+ggplot(FS_SNAP, aes(x = SNAP, fill = FS_Status)) + geom_bar(position = "fill") + labs( x = " " ,y = " ")
 ```
 
-```{r, results='markup'}
+#### Statistical Testing
+
+***
+
+* We are Chi-square test
+
+* Our Null Hypothesis is that SNAP Status and Food Security Status are Independent of each other.
+
+* Taking our alpha to be 5%
+
+
+***
+
+
+```{r, results='markup', echo=FALSE}
 chi_test_SNAP <- table(FS_SNAP$SNAP, FS_SNAP$FS_Status)
-chi_test_SNAP
+
 
 chisq.test(chi_test_SNAP)
 
 ```
+***
+
+* Since, the P-Value is less than our taken alpha we can say that there is a statistically significant relationship between SNAP Status and Food Security
+
+***
 
 
-```{r,results = 'markup'}
-table(FS_SNAP$SNAP)
+#### Odds Ratio
 
+```{r,results = 'markup', echo=FALSE}
 SNAP_Odds <- droplevels(subset(FS_SNAP, SNAP != "Refused" & SNAP != "Dont Know"))
 
 TAB <- table(SNAP_Odds$SNAP, SNAP_Odds$FS_Status)
+
 
 barplot(TAB, beside= T, legend = T)
 
 epi.2by2(TAB, method = "cohort.count")
 ```
+***
 
-```{r data_ave, results='markup'}
+* The Odds ratio is 0.46, with a 95% Confidence Interval
+* This means that the odds of a person not on SNAP to be food secure is 2.17 times the odds of person on SNAP to be food secure.
+
+
+
+***
+
+
+```{r data_ave, results='markup', echo=FALSE}
 food_ave <- subset(FS_Subset, select = c("Id",	"Number_of_Jobs",	"Hours_on_Jobs",	"Education_Level", "FoodSecurity_score"))
 head(food_ave)
 str(food_ave)
 ```
+## Renaming Education level, Number of Hours on Job per week and Number of Jobs
+```{r, results='markup', echo=FALSE}
+levels(food_ave$Education_Level) <- c('Not Applicable','Less Than 1st Grade', '1st, 2nd, 3rd Or 4th Grade','5th Or 6th Grade', '7th Or 8th Grade', '9th Grade', '10th Grade', '11th Grade', '12th Grade No Diploma', 'High School Grad-Diploma Or Equiv (Ged)', 'Some College But No Degree', 'Associate Degree-Occupational/Vocational', 'Associate Degree-Academic Program', 'Bachelors Degree','Masters Degree', 'Professional School Deg' , 'Doctorate Degree')
 
-```{r factor, results='markup'}
+summary(food_ave$Education_Level, title = "PEEDUCA")
+
+
+levels(food_ave$Number_of_Jobs) <- c('Not Applicable', '2 Jobs', '3 Jobs', '4 or more jobs')
+summary(food_ave$Number_of_Jobs, title = "PEMJNUM")
+
+
+```
+
+
+```{r factor, results='markup', echo=FALSE}
 food_ave$Number_of_Jobs = as.factor(food_ave$Number_of_Jobs)
 food_ave$Education_Level = as.factor(food_ave$Education_Level)
 food_ave$FoodSecurity_score = as.factor(food_ave$FoodSecurity_score)
@@ -183,30 +329,30 @@ str(food_ave)
 
 ### Number of Jobs
 
-```{r no_of_jobs, results='markup'}
+```{r no_of_jobs, results='markup', echo=FALSE}
 plot(food_ave$Number_of_Jobs)
 ggplot(food_ave) +
   geom_bar(aes(x = Number_of_Jobs, fill = FoodSecurity_score), position = "dodge") +
   xlab("Jobs") + ylab("Count")
 ```
+```{r, results='markup', echo=FALSE}
+food_noj <- subset(food_ave, food_ave$Number_of_Jobs != 'Not Applicable')
+ggplot(food_noj, aes(x = Number_of_Jobs, fill = FoodSecurity_score)) + geom_bar(position = "fill") + labs( x = " " , y = " ", title = "Food Security Score on Number of Jobs")
+```
 
+```{r, results='markup', echo=FALSE}
 
-```{r, results='markup'}
-ggplot(subset(food_ave, Number_of_Jobs == -1)) +
+ggplot(subset(food_ave, Number_of_Jobs == '2 Jobs' )) +
   geom_bar(aes(x = Number_of_Jobs, fill = FoodSecurity_score), position = "dodge") +
-  xlab("Jobs") + ylab("Count")
+  xlab("Number of Jobs") + ylab("Count")
 
-ggplot(subset(food_ave, Number_of_Jobs == 2)) +
+ggplot(subset(food_ave, Number_of_Jobs == '3 Jobs')) +
   geom_bar(aes(x = Number_of_Jobs, fill = FoodSecurity_score), position = "dodge") +
-  xlab("Jobs") + ylab("Count")
+  xlab("Number of Jobs") + ylab("Count")
 
-ggplot(subset(food_ave, Number_of_Jobs == 3)) +
+ggplot(subset(food_ave, Number_of_Jobs == '4 or more Jobs')) +
   geom_bar(aes(x = Number_of_Jobs, fill = FoodSecurity_score), position = "dodge") +
-  xlab("Jobs") + ylab("Count")
-
-ggplot(subset(food_ave, Number_of_Jobs == 4)) +
-  geom_bar(aes(x = Number_of_Jobs, fill = FoodSecurity_score), position = "dodge") +
-  xlab("Jobs") + ylab("Count")
+  xlab("Number of Jobs") + ylab("Count")
 ```
 
 Here 
@@ -219,12 +365,21 @@ Here
 
 In the above graphs, people say that they have High Food Security irrespective of the number of jobs. But lets use Chi-Square test to see if they are really independent of each other
 
-```{r, results='markup'}
-contable <- table(food_ave$Number_of_Jobs, food_ave$FoodSecurity_score)
-xkabledply(contable)
+```{r, results='markup', echo=FALSE}
+food_num <- droplevels(subset(food_ave, Number_of_Jobs != "Not Applicable" ))
+str(food_num)
+```
+
+```{r, results='markup', warning=FALSE, echo=FALSE}
+str(food_noj)
+```
+
+```{r, results='markup',warning=FALSE, echo=FALSE}
+contable_number_of_jobs <- table(food_num$Number_of_Jobs, food_num$FoodSecurity_score)
+xkabledply(contable_number_of_jobs)
 
 ## Chi-Square Test 
-chi_test <- chisq.test(contable, correct = F)
+chi_test <- chisq.test(contable_number_of_jobs, correct = F)
 chi_test
 ```
 
@@ -234,16 +389,20 @@ From the test, we see that the P-value for the Chi-square test is 0.3871 which i
 
 ###Education Level
 
-```{r, results='markup'}
-edu_freq <- as.data.frame(table(food_ave$Education_Level))
+```{r, results='markup', echo=FALSE}
+food_edu <- droplevels(subset(food_ave, Education_Level != "Not Applicable" ))
+str(food_edu)
+edu_freq <- as.data.frame(table(food_edu$Education_Level))
 edu_freq
 ```
 
-```{r , results='markup'}
-plot(food_ave$Education_Level)
-ggplot(food_ave) +
+```{r , results='markup', echo=FALSE}
+plot(food_edu$Education_Level)
+ggplot(food_edu) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Jobs") + ylab("Count")
+
+ggplot(food_edu, aes(x = Education_Level, fill = FoodSecurity_score)) + geom_bar(position = "fill") + labs( x = " " , y = " ", title = "Food Security Score on Education Level")
 ```
 The response is understood as follows:
 
@@ -263,78 +422,78 @@ The response is understood as follows:
 44 MASTER'S DEGREE (EX: MA, MS, MEng, MEd, MSW)
 45 PROFESSIONAL SCHOOL DEG (EX: MD, DDS, DVM)
 46 DOCTORATE DEGREE (EX: PhD, EdD)
+```{r, echo=FALSE}
+summary(food_edu$Education_Level)
+```
 
-```{r, results='markup'}
-ggplot(subset(food_ave, Education_Level == -1)) +
+```{r, results='markup', echo=FALSE}
+
+ggplot(subset(food_edu, Education_Level == 'less Than 1st Grade')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 31)) +
+ggplot(subset(food_edu, Education_Level == '1st, 2nd, 3rd Or 4th Grade’')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 32)) +
+ggplot(subset(food_edu, Education_Level == '5th Or 6th Grade’')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 33)) +
+ggplot(subset(food_edu, Education_Level == '7th Or 8th Grade')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 34)) +
+ggplot(subset(food_edu, Education_Level == '9th Grade')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 35)) +
+ggplot(subset(food_edu, Education_Level == '10th Grade’')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 36)) +
+ggplot(subset(food_edu, Education_Level == '11th Grade')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 37)) +
+ggplot(subset(food_edu, Education_Level == '12th Grade No Diploma')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 38)) +
+ggplot(subset(food_edu, Education_Level == 'High School Grad-Diploma Or Equiv (Ged)')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 39)) +
+ggplot(subset(food_edu, Education_Level == 'Some College But No Degree')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 40)) +
+ggplot(subset(food_edu, Education_Level == 'Associate Degree-Occupational/Vocational')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 41)) +
+ggplot(subset(food_edu, Education_Level == 'Associate Degree-Academic Program')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 42)) +
+ggplot(subset(food_edu, Education_Level == 'Bachelors Degree')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 43)) +
+ggplot(subset(food_edu, Education_Level == 'Masters Degree')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 44)) +
+ggplot(subset(food_edu, Education_Level == 'Professional School Deg ')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 
-ggplot(subset(food_ave, Education_Level == 45)) +
-  geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
-  xlab("Education") + ylab("Count")
-
-ggplot(subset(food_ave, Education_Level == 46)) +
+ggplot(subset(food_edu, Education_Level == 'Doctorate Degree ')) +
   geom_bar(aes(x = Education_Level, fill = FoodSecurity_score), position = "dodge") +
   xlab("Education") + ylab("Count")
 ```
 
-```{r, results='markup'}
+```{r, results='markup', warning=FALSE, echo=FALSE}
 contable_edu <- table(food_ave$Education_Level, food_ave$FoodSecurity_score)
 xkabledply(contable_edu)
 
@@ -347,33 +506,41 @@ chi_test
 
 ##Hours_on_Jobs
 
-```{r , results='markup'}
-plot(food_ave$Hours_on_Jobs)
-ggplot(food_ave) +
+```{r, results='markup', echo=FALSE}
+food_hoj <- droplevels(subset(food_ave, Hours_on_Jobs != -4 ))
+str(food_hoj)
+hoj_freq <- as.data.frame(table(food_ave$Hours_on_Jobs))
+hoj_freq
+```
+
+
+```{r , results='markup', echo=FALSE}
+plot(food_hoj$Hours_on_Jobs)
+ggplot(food_hoj) +
   geom_bar(aes(x = Hours_on_Jobs, fill = FoodSecurity_score), position = "dodge") +
   xlab("Jobs") + ylab("Count")
 ```
 
-```{r, results='markup'}
-ggplot(food_ave, aes(Hours_on_Jobs, fill = FoodSecurity_score)) + 
+```{r, results='markup', echo=FALSE}
+ggplot(food_hoj, aes(Hours_on_Jobs, fill = FoodSecurity_score)) + 
         geom_histogram(binwidth=5)
-ggplot(food_ave, aes(Hours_on_Jobs)) + 
+ggplot(food_hoj, aes(Hours_on_Jobs)) + 
         geom_freqpoly(binwidth=1)
-ggplot(food_ave, aes(Hours_on_Jobs, color= FoodSecurity_score)) + 
+ggplot(food_hoj, aes(Hours_on_Jobs, color= FoodSecurity_score)) + 
         geom_freqpoly(binwidth=25)
-ggplot(food_ave, aes(Hours_on_Jobs, fill = FoodSecurity_score)) + 
+ggplot(food_hoj, aes(Hours_on_Jobs, fill = FoodSecurity_score)) + 
         geom_histogram(binwidth=5) + 
         facet_wrap(~FoodSecurity_score)
 ```
 
-```{r, results='markup'}
+```{r, results='markup', echo=FALSE}
 vary_hours <- nrow(food_ave[food_ave$Hours_on_Jobs == -4,])
 vary_hours
 ```
 
 There are `r nrow(food_ave[food_ave$Hours_on_Jobs == -4,])` whose working hours vary. 
 
-```{r, results='markup'}
+```{r, results='markup', echo=FALSE}
 summary(food_ave$Hours_on_Jobs)
 
 getmode <- function(v) {
@@ -382,39 +549,32 @@ getmode <- function(v) {
 }
 getmode(food_ave$Hours_on_Jobs)
 ```
-
-```{r}
-#ggplot(food_ave, aes(x=FoodSecurity_score, y=Hours_on_Jobs)) + 
- # geom_boxplot( colour=c("red","blue","violet","navy blue","black"), outlier.shape=8, outlier.size=4) +
-  #labs(title="Boxplot for Hours on Jobs", x="Control / Treatment", y = "Hours on Job")
+```{r, echo=FALSE}
+ggplot(food_hoj, aes(x=FoodSecurity_score, y=Hours_on_Jobs)) + 
+  geom_boxplot( colour=c("blue","violet","navy blue","black"), outlier.shape=8, outlier.size=4) +
+  labs(title="Boxplot for Hours on Jobs", x="Control / Treatment", y = "Hours on Job")
 ```
 
-```{r, results='markup', warning=FALSE}
-h_anova <- aov(Hours_on_Jobs ~ FoodSecurity_score, data = food_ave)
+```{r, results='markup', warning=FALSE, echo=FALSE}
+h_anova <- aov(Hours_on_Jobs ~ FoodSecurity_score, data = food_hoj)
 h_tuskey <- TukeyHSD(h_anova)
 summary(h_anova)
 h_tuskey
 ```
 
 2 - 1, 3 -1, 4 -1, 3 -2, 4 -2 have significant difference in there mean.
-getmode(food_ave$Hours_on_Jobs)
-
-```{r}
-#ggplot(food_ave, aes(x=FoodSecurity_score, y=Hours_on_Jobs)) + 
- # geom_boxplot( colour=c("red","blue","violet","navy blue","black"), outlier.shape=8, outlier.size=4) +
-#  labs(title="Boxplot for Hours on Jobs", x="Control / Treatment", y = "Hours on Job")
-```
 
 
-There are `r nrow(food_ave[food_ave$Hours_on_Jobs == -4,])` whose working hours vary. 
-summary(food_ave$Hours_on_Jobs)
+
+
+
 
 >>>>>>> 8657d5728a00f036f19d3ba04f8e0d67a4b3431f
 
 
 -***States, Family size, and Household Income***
 
-```{r, results='markup'}
+```{r, results='markup', echo=FALSE}
 levels(FS_Subset$'States') <- c('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY' )
 summary(FS_Subset$'States', title = "GESTFIPS")
 
@@ -426,7 +586,7 @@ Alabama 1207 and Washington DC 1207, Florida 2738 and New York 2580, IL 2052 and
 
 ## Plotting barcharts between all the levels of state and food security status
 
-```{r}
+```{r, results='markup', echo=FALSE}
 for(i in levels(FS_Subset$States)){
    
   print(ggplot(subset(FS_Subset, States == i ) , aes(x= States, color =FoodSecurity_score, fill = FoodSecurity_score)) + geom_bar( aes(y = (..count..)/sum(..count..)*100), position = "dodge"))
@@ -434,29 +594,16 @@ for(i in levels(FS_Subset$States)){
 ```
 
 
-```{r  results='markup'}
-#library(ggplot2)
+```{r, results='markup', echo=FALSE}
+library(ggplot2)
 #qqplot(food_una$States, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="States", ylab="Food security Score",  main="QQ Plot for Food security vs States")
-#hist(x=States )
-```
 
+```
 <<<<<<< HEAD
 
-```{r  results='markup'}
-
-state1<-subset(FS_Subset, FoodSecurity_score=="Very Low Food Security")
-state1
-state2<-subset(FS_Subset, FoodSecurity_score=="Low Food Security")
-state2
-state3<-subset(FS_Subset, FoodSecurity_score=="Marginal Food Security")
-state3
-state4<-subset(FS_Subset, FoodSecurity_score=="High Food Security")
-state4
-
-```
 
 
-```{r  results='markup'}
+```{r, results='markup', echo=FALSE}
 #food_una <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS", "HRNUMHOU",	"HEFAMINC", "HRFS12MD"))
 food_una <- subset(FS_Subset, select = c("Id", "States","Family_Size","Household_Income","FoodSecurity_score", "PRNMCHLD"))
 head(food_una)
@@ -481,20 +628,19 @@ Reference to household income:
 15 100,000 TO 149,999  
 16 150,000 OR MORE  
 
-```{r}
+```{r, echo=FALSE}
 income_t <- table(FS_Subset$Household_Income, FS_Subset$FoodSecurity_score)
 chisq.test(income_t)
 ```
 We can say that Household income is affecting food insecurity. 
 
-```{r}
+```{r, echo=FALSE}
 family_t <- table(FS_Subset$Family_Size, FS_Subset$FoodSecurity_score)
 chisq.test(family_t)
 ```
 We can say that Family size is affecting food insecurity. 
 
-
-```{r  results='markup'}
+```{r, results='markup', echo=FALSE}
 
 boxplot(FoodSecurity_score ~ Family_Size, data = food_una, col=c("blue", "red", "green", "yellow", "purple", "orange"), main="Family size - Food security")
 boxplot(FoodSecurity_score ~ Household_Income, data = food_una, col=c("blue", "red", "green", "yellow", "purple", "orange"), main="Household Income - Food security")
@@ -504,24 +650,25 @@ boxplot(FoodSecurity_score ~ States, data = food_una, col=c("blue", "red", "gree
 As you can see from the boxplot, whenever family size bigger (more than 6 people), food insecurity is high. 
 Also, household income has direct effect on food security. When household income is higher than 40k, food security score is low. 
 
-```{r  results='markup'}
+```{r, results='markup', echo=FALSE}
 library(ggplot2)
 qqplot(food_una$Household_Income, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="Household income", ylab="Food security Score",  col=food_una$Household_Income, main="QQ Plot for Food security vs Household income")
 
 ```
 
-```{r  results='markup'}
+```{r, results='markup', echo=FALSE}
 summary(FS_Subset$Family_Size)
 
 ```
 
 
-```{r  results='markup'}
+```{r, results='markup', echo=FALSE}
 library(ggplot2)
 qqplot(food_una$Family_Size, food_una$FoodSecurity_score, plot.it = TRUE,  xlab="Family size", ylab="Food security Score",  col=food_una$Family_Size, main="QQ Plot for Food security vs Family")
 
 ```
-```{r data_una, results='markup'}
+
+```{r data_una, results='markup', echo=FALSE}
 
 ggplot(data=food_una, mapping = aes(x = Family_Size, y = FoodSecurity_score)) + 
   geom_point(size=5)+aes(color = Family_Size) +
@@ -529,14 +676,13 @@ ggplot(data=food_una, mapping = aes(x = Family_Size, y = FoodSecurity_score)) +
 
 ```
 
-```{r results='markup'}
+```{r, results='markup', echo=FALSE}
 
 ggplot(data=food_una, mapping = aes(x = Family_Size, y = FoodSecurity_score)) + 
   geom_point(size=5)+aes(color = Household_Income) +
   theme_bw()
 
 ```
+Interesting thing from this graph is that when family size ig bigger, household income is high and that family has high food security. When Family size and Household income are separate, they have significant relatioship with food security. However, when they are combined together, the result is different. For further analysis, we need to consider age and empoyment type of the family members. 
 
-```{r, results='markup'}
-summary(food_una$Household_Income)
-```
+
