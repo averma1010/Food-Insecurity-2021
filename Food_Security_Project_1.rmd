@@ -520,7 +520,7 @@ ggplot(food_hoj, aes(Hours_on_Jobs, fill = FoodSecurity_score)) +
 ***
 The above graphs clearly depicts the distribution of data on this variable.
 
-The following is a bargraph for the same variable.
+The following is a box-plot for the same variable.
 
 ***
 ```{r,results='markup',echo=FALSE, out.width="35%", out.height="20%",fig.cap=" ",fig.show='hold',fig.align='center'}
@@ -529,7 +529,7 @@ ggplot(food_hoj, aes(x=FoodSecurity_score, y=Hours_on_Jobs)) +
   labs(title="Boxplot for Hours on Jobs", x="Control / Treatment", y = "Hours on Job")
 ```
 ***
-From the bargraph, we can see that, though the boxes lie around the same region, few of the classes have very evident difference. This needs to be checked. Whether food security score affects the hours on job can be studied using ANOVA test and our hypothesis is verified by this statistical test.
+From the box-plot, we can see that, though the boxes lie around the same region, few of the classes have very evident difference. This needs to be checked. Whether food security score affects the hours on job can be studied using ANOVA test and our hypothesis is verified by this statistical test.
 Further on the Post-Hoc test verifies which groups have differences.
 
 ***
@@ -678,9 +678,16 @@ The initial results shows that 10% of the population are still food insecure in 
 ### References
 
 •	https://www2.census.gov/programs-surveys/cps/datasets/2021/supp/dec21pub.csv
+
 •	https://www.census.gov/data/datasets/time-series/demo/cps/cps-supp_cps-repwgt/cps-food-security.html
+
 •	https://www.ers.usda.gov/data-products/food-security-in-the-united-states/
+
 •	https://r4ds.had.co.nz/exploratory-data-analysis.html
-•	https://www.webpages.uidaho.edu/~stevel/519/How%20to%20get%20correlation%20between%20two%20categorical%20variable%20and%20a%20categorical%20variable%20and%20continuous%20variable.html
+
+• https://www.webpages.uidaho.edu/
+
 •	http://statseducation.com/Introduction-to-R/modules/graphics/cont/
-•	https://www.tutorialspoint.com/r/r_mean_median_mode.htm
+
+•	https://www.tutorialspoint.com/r/r_mean_median_mode.html
+
