@@ -3,7 +3,10 @@
 ***
 ### Introduction
 
-Although food is the basic human right, many people in the world are living in highly food insecure condition. According to World Bank, with the pandemic hit, domestic food price inflation increased at least by 5 percent globally. Also, according to the United Nations news, 828 million people were affected by hunger in 2021. It's important to analyse what factors are affecting food security and take measures to reduce world's hunger. This  the one of the reasons that we were interested to study food security in USA. 
+Although food is the basic human right, many people in the world are living in highly food insecure condition. 
+
+According to World Bank, with the pandemic hit, domestic food price inflation increased at least by 5 percent globally. Also, according to the United Nations news, 828 million people were affected by hunger in 2021. It's important to analyse what factors are affecting food security and take measures to reduce world's hunger. This  the one of the reasons that we were interested to study food security in USA. 
+
 Although, there were limitations to our study. Food security is very complex issue, and needs multi-angle, thorough research. We've chosen only certain socio-economic variables out of 507 variables. 
 
 
@@ -11,15 +14,15 @@ Although, there were limitations to our study. Food security is very complex iss
 
 #### Our team’s research topic is the situation of food security in 2021.  We want to know how different demographic and socioeconomic factors relate to food security. 
 
-*We are using the Current Population Survey - Food Security Supplement Dec 2021 data provided by the US Census Bureau*
+* We are using the Current Population Survey - Food Security Supplement Dec 2021 data provided by the US Census Bureau
 
-*The Dataset contains 507 variables and roughly 120,000 observations*
+* The Dataset contains 507 variables and roughly 120,000 observations
 
 *** 
 
 ##### The Smart Question we have proposed and hope to answer are
 
-**Specific**:- To study the specific pattern shown in the data that affects food security such as states, counties, income level, whether the family uses SNAP, race, immigrant status, work status, education level and many more demographic, socio-economic variables.  
+**Specific**: To study the specific pattern shown in the data that affects food security such as states, counties, income level, whether the family uses SNAP, race, immigrant status, work status, education level and many more demographic, socio-economic variables.  
 
 **Measurable**: Use EDA techniques to know how significantly different factors contribute to food insecurity.  
 
@@ -69,8 +72,9 @@ FS_Subset[] <- lapply( FS_Subset, factor)
 str(FS_Subset)
 ```
 
+***
 
-**Coming to our Response Variable, Food Security** 
+### **Coming to our Response Variable, Food Security** 
 
 ***
   
