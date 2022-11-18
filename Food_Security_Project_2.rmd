@@ -32,7 +32,11 @@ FS_Subset[] <- lapply( FS_Subset, factor)
 
 str(FS_Subset)
 ```
+<<<<<<< Updated upstream
 * Since we will be doing logistic regression, we have to reduce our response to two level only. If we complete this project before the deadline we can look into multinomial regression aswell.
+=======
+* Since we will be doing logistic regression, we have to reduce our response to two level only. If we complete this project before the deadline we can look into multinational regression aswell.
+>>>>>>> Stashed changes
 
 ```{r, results='markup', echo=FALSE, results='hide'}
 levels(FS_Subset$'FoodSecurity_score') <- c( "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
