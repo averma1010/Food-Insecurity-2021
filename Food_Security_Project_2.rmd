@@ -1,4 +1,4 @@
-* Hi, this is the rmd file for project 2. We will be doing logistic regression to acertain the likelihood of food insecurity in permutations of social factors
+* Hi, this is the rmd file for project 2. We will be doing logistic regression to certain the likelihood of food insecurity in permutations of social factors
 
 
 
@@ -21,9 +21,10 @@ library(epiR)
 
 
 FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001 & HRFS12MD != -9)
-FS_Subset <- subset(FS_Subset, select = c("HRHHID",	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "HRFS12MD", "PRNMCHLD"))
+FS_Subset <- subset(FS_Subset, select = c(	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "PRNMCHLD" , "HRFS12MD"))
 
-FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "States" = "GESTFIPS", "Family_Size" = "HRNUMHOU",	"Household_Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "FoodSecurity_score" = "HRFS12MD")
+
+FS_Subset <- FS_Subset %>% rename("States" = "GESTFIPS", "Family_Size" = "HRNUMHOU",	"Household_Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "Number_of_children" = "PRNMCHLD",  "FoodSecurity_score" = "HRFS12MD")
 
 ## Converting the all the columns to factors as they are all ordinal(except the Id, but since it's categorical i'm converting it into a factor too)
 
@@ -31,19 +32,59 @@ FS_Subset <- FS_Subset %>% rename("Id" = "HRHHID", "States" = "GESTFIPS", "Famil
 FS_Subset[] <- lapply( FS_Subset, factor)
 
 str(FS_Subset)
+
 ```
-<<<<<<< Updated upstream
+
+
+
 * Since we will be doing logistic regression, we have to reduce our response to two level only. If we complete this project before the deadline we can look into multinomial regression aswell.
-=======
-* Since we will be doing logistic regression, we have to reduce our response to two level only. If we complete this project before the deadline we can look into multinational regression aswell.
->>>>>>> Stashed changes
+
+
+
 
 ```{r, results='markup', echo=FALSE, results='hide'}
 levels(FS_Subset$'FoodSecurity_score') <- c( "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
-summary(FS_Subset$'FoodSecurity_score')
 
 
 FS_Subset$FS_Status <- FS_Subset$FoodSecurity_score
 
 levels(FS_Subset$FS_Status) <- c( "Food Secure", "Food Secure", "Food Insecure", "Food Insecure")
+
+levels(FS_Subset$'Ethnicity') <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian', 'White-black', 'White-AI', 'White-Asian', 'White-HP', 'Black-AI', 'Black-Asian', 'Black-HP', 'AI-Asian', 'AI-HP', 'Asian-HP', 'W-B-AI', 'W-B-A', 'W-B-HP', 'W-AI-A', 'W-AI-HP', 'W-A-HP', 'B-AI-A', 'W-B-AL-A', 'W-AI-A-HP', 'Other 3 race combo', 'Other 4 and 5 race combo')
+
+
+
+
+
+
+levels(FS_Subset$'Citizenship_status') <- c('NATIVE, BORN IN THE UNITED STATES', 'NATIVE, BORN IN PUERTO RICO OR OTHER U.S. ISLAND AREAS', 'NATIVE, BORN ABROAD OF AMERICAN PARENT OR PARENTS', 'FOREIGN BORN, U.S. CITIZEN BY NATURALIZATION', 'FOREIGN BORN, NOT A CITIZEN OF THE UNITED STATES')
+summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
+
+
+
+
+
+levels(FS_Subset$SNAP) <- c('Refused', 'Dont Know', 'Uses SNAP', 'No SNAP')
+
+```
+* Splitting the data
+
+```{r, results ='markup'}
+set.seed(1)
+
+sample <- sample(c(TRUE, FALSE), nrow(FS_Subset), replace = TRUE, prob = c(0.6, 0.4))
+
+train <- FS_Subset[sample, ]
+test  <- FS_Subset[!sample, ]
+
+```
+
+* Just adding all the variables in the in the logistic regression to see what happens.We can then decide to take some 
+
+```{r, results='markup'}
+logistic <- glm(FS_Status ~ States + Family_Size + Household_Income + SNAP + Citizenship_status + Number_of_Jobs + Hours_on_Jobs + Education_Level + Number_of_children + Ethnicity , data = train, family = "binomial")
+
+summary(logistic)
+
+
 ```
