@@ -23,7 +23,7 @@ library(epiR)
 FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001 & HRFS12MD != -9)
 FS_Subset <- subset(FS_Subset, select = c(	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "PRNMCHLD" , "HRFS12MD"))
 
-
+  
 
 FS_Subset <- FS_Subset %>% rename("States" = "GESTFIPS", "Family_Size" = "HRNUMHOU",	"Household_Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "Number_of_children" = "PRNMCHLD",  "FoodSecurity_score" = "HRFS12MD")
 
@@ -100,10 +100,15 @@ summary(logistic)
 ```{r, results='markup'}
 
 logistic_model1.prob <- predict(logistic, test, type = "response")
-logistic_model1.pred = rep("Food Secure", dim(train)[1])
+logistic_model1.pred = rep("Food Secure", dim(test)[1])
 logistic_model1.pred[logistic_model1.prob > .5] = "Food Insecure"
 
 mean(logistic_model1.pred == test$FS_Status)
 
-table(logistic_model1.pred, train$FS_Status)
+table(logistic_model1.pred, test$FS_Status)
+```
+
+```{r results='markup'}
+sum(test$FS_Status == "Food Secure")/sum(test$FS_Status == "Food Insecure")
+
 ```
