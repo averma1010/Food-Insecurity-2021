@@ -112,3 +112,5 @@ table(logistic_model1.pred, test$FS_Status)
 sum(test$FS_Status == "Food Secure")/sum(test$FS_Status == "Food Insecure")
 
 ```
+
+* So, our model has a 90% classification rate but the ratio of Food secure to Insecure in our data is 9.04. so this is a terrible model that's as good as tossing a coin. We will have to do something about the imbalance in our response and will have to clean our data further. Since all our variables are categorical of some kind, I highly recommend reading about categorical data modelling to figure out what to do.
