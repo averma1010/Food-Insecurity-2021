@@ -1004,16 +1004,635 @@ mean(logistic_model1.pred == test$FS_Status)</code></pre>
 ## logistic_model1.pred Food Secure Food Insecure
 ##        Food Insecure          94            91
 ##        Food Secure         25701          2762</code></pre>
+<p>Our precision for this model is 0.4918919 Our recall for this model
+is 0.0318962</p>
 <pre class="r"><code>sum(test$FS_Status == &quot;Food Secure&quot;)/sum(test$FS_Status == &quot;Food Insecure&quot;)</code></pre>
 <pre><code>## [1] 9.04136</code></pre>
 <ul>
-<li>So, our model has a 90% classification rate but the ratio of Food
+<li><p>So, our model has a 90% classification rate but the ratio of Food
 secure to Insecure in our data is 9.04. so this is a terrible model
 that’s as good as tossing a coin. We will have to do something about the
 imbalance in our response and will have to clean our data further. Since
 all our variables are categorical of some kind, I highly recommend
-reading about categorical data modelling to figure out what to do.</li>
+reading about categorical data modelling to figure out what to
+do.</p></li>
+<li><p>I think doing one-hot encoding(dummy variable) will help in
+dealing with the level issues in our predictors. We should also combine
+similar levels so we can reduce the number of levels. also the negative
+values which correspond to not in the universe or similar have to be
+dealt with in someway. we can either choose to omit those observation or
+try to find a proxy for them. I will prefer the latter.</p></li>
+<li><p>For the response variable imbalance we can create a new samples
+where the distribution between the responses is equal. Maybe something
+like k-fold Cross-Validation would work but I am not sure and would have
+to read more about it.</p></li>
 </ul>
+<div id="starting-off-with-the-balancing-the-data-in-respect-to-the-response." class="section level4">
+<h4>Starting off with the balancing the data in respect to the
+response.</h4>
+<pre class="r"><code>weight_minority_class = sum(FS_Subset$FS_Status == &quot;Food Secure&quot;)/sum(FS_Subset$FS_Status == &quot;Food Insecure&quot;)
+for(i in seq_len(NROW(FS_Subset))){
+  
+if(FS_Subset$FS_Status[i] == &quot;Food Insecure&quot;){
+  FS_Subset$Weight[i] = weight_minority_class
+
+}
+  else
+    FS_Subset$Weight[i] = 1
+}
+
+FS_Subset$Weight &lt;- as.numeric(FS_Subset$Weight)
+summary(FS_Subset$Weight)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   1.000   1.000   1.000   1.801   1.000   9.026</code></pre>
+<pre class="r"><code>## Splitting again because train and test doesn&#39;t contain the weight column
+
+set.seed(1)
+
+sample &lt;- sample(c(TRUE, FALSE), nrow(FS_Subset), replace = TRUE, prob = c(0.6, 0.4))
+
+train &lt;- FS_Subset[sample, ]
+test  &lt;- FS_Subset[!sample, ]
+
+
+logistic_weighted &lt;- glm(FS_Status ~ States + Family_Size + Household_Income + SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = train,  weights = Weight, family = &quot;binomial&quot;)</code></pre>
+<pre><code>## Warning in eval(family$initialize): non-integer #successes in a binomial glm!</code></pre>
+<pre class="r"><code>summary(logistic_weighted)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = FS_Status ~ States + Family_Size + Household_Income + 
+##     SNAP + Citizenship_status + Number_of_Jobs + Education_Level, 
+##     family = &quot;binomial&quot;, data = train, weights = Weight)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.6359  -1.2900  -0.3993  -0.3077   8.2502  
+## 
+## Coefficients:
+##                                                                            Estimate
+## (Intercept)                                                               -0.655971
+## States2                                                                    0.055820
+## States4                                                                   -0.308943
+## States5                                                                    0.328986
+## States6                                                                    0.087637
+## States8                                                                   -0.012843
+## States9                                                                   -0.260804
+## States10                                                                   0.517060
+## States11                                                                  -0.324831
+## States12                                                                  -0.285501
+## States13                                                                  -0.560101
+## States15                                                                  -0.074958
+## States16                                                                  -0.315280
+## States17                                                                  -0.062673
+## States18                                                                   0.178072
+## States19                                                                   0.409445
+## States20                                                                   0.101445
+## States21                                                                  -0.227293
+## States22                                                                   0.010191
+## States23                                                                  -0.170725
+## States24                                                                   0.563357
+## States25                                                                  -0.070258
+## States26                                                                   0.006135
+## States27                                                                   0.178844
+## States28                                                                   0.104034
+## States29                                                                  -0.049100
+## States30                                                                  -0.221481
+## States31                                                                  -0.066746
+## States32                                                                  -0.019079
+## States33                                                                  -0.105449
+## States34                                                                  -0.151156
+## States35                                                                  -0.081632
+## States36                                                                   0.105355
+## States37                                                                  -0.050201
+## States38                                                                   0.251792
+## States39                                                                  -0.188987
+## States40                                                                  -0.049374
+## States41                                                                  -0.003358
+## States42                                                                  -0.377319
+## States44                                                                  -0.239112
+## States45                                                                   0.322768
+## States46                                                                   0.111433
+## States47                                                                  -0.226157
+## States48                                                                  -0.007051
+## States49                                                                   0.047319
+## States50                                                                   0.193974
+## States51                                                                  -0.258211
+## States53                                                                  -0.310879
+## States54                                                                   0.059713
+## States55                                                                  -0.261321
+## States56                                                                   0.163262
+## Family_Size2                                                              -0.140349
+## Family_Size3                                                              -0.018317
+## Family_Size4                                                               0.103108
+## Family_Size5                                                              -0.136259
+## Family_Size6                                                               0.035268
+## Family_Size7                                                               0.274321
+## Family_Size8                                                               0.757580
+## Family_Size9                                                              -0.006557
+## Family_Size10                                                             -1.768556
+## Family_Size11                                                             -0.381140
+## Family_Size12                                                              0.850952
+## Family_Size13                                                            -13.547762
+## Family_Size14                                                             -9.538814
+## Household_Income2                                                          0.167091
+## Household_Income3                                                          0.050836
+## Household_Income4                                                         -0.146330
+## Household_Income5                                                         -0.061732
+## Household_Income6                                                         -0.330325
+## Household_Income7                                                         -0.294159
+## Household_Income8                                                         -0.322867
+## Household_Income9                                                         -0.364009
+## Household_Income10                                                        -0.558709
+## Household_Income11                                                        -0.247812
+## Household_Income12                                                        -0.229038
+## Household_Income13                                                        -0.325177
+## Household_Income14                                                        -0.242515
+## Household_Income15                                                        -0.538904
+## Household_Income16                                                        -0.911423
+## SNAP-2                                                                     1.180126
+## SNAP-1                                                                    -1.330487
+## SNAP1                                                                      2.650705
+## SNAP2                                                                      1.956980
+## Citizenship_statusNATIVE, BORN IN PUERTO RICO OR OTHER U.S. ISLAND AREAS   0.310136
+## Citizenship_statusNATIVE, BORN ABROAD OF AMERICAN PARENT OR PARENTS       -0.055176
+## Citizenship_statusFOREIGN BORN, U.S. CITIZEN BY NATURALIZATION            -0.068850
+## Citizenship_statusFOREIGN BORN, NOT A CITIZEN OF THE UNITED STATES         0.232330
+## Number_of_Jobs2                                                            0.479298
+## Number_of_Jobs3                                                            0.279561
+## Number_of_Jobs4                                                          -11.710992
+## Education_Level31                                                          0.601243
+## Education_Level32                                                         -0.075512
+## Education_Level33                                                          0.309911
+## Education_Level34                                                         -0.004707
+## Education_Level35                                                         -0.031697
+## Education_Level36                                                          0.214121
+## Education_Level37                                                          0.100037
+## Education_Level38                                                          0.138429
+## Education_Level39                                                          0.008491
+## Education_Level40                                                          0.035369
+## Education_Level41                                                          0.189339
+## Education_Level42                                                         -0.115389
+## Education_Level43                                                         -0.331923
+## Education_Level44                                                         -0.538361
+## Education_Level45                                                         -0.579718
+## Education_Level46                                                         -0.667834
+##                                                                          Std. Error
+## (Intercept)                                                                0.219335
+## States2                                                                    0.114942
+## States4                                                                    0.110108
+## States5                                                                    0.099787
+## States6                                                                    0.081395
+## States8                                                                    0.120960
+## States9                                                                    0.145947
+## States10                                                                   0.117625
+## States11                                                                   0.114815
+## States12                                                                   0.089455
+## States13                                                                   0.104482
+## States15                                                                   0.111044
+## States16                                                                   0.103084
+## States17                                                                   0.097569
+## States18                                                                   0.105955
+## States19                                                                   0.119031
+## States20                                                                   0.113929
+## States21                                                                   0.116188
+## States22                                                                   0.096784
+## States23                                                                   0.143327
+## States24                                                                   0.122383
+## States25                                                                   0.113954
+## States26                                                                   0.097481
+## States27                                                                   0.119889
+## States28                                                                   0.094064
+## States29                                                                   0.106177
+## States30                                                                   0.102149
+## States31                                                                   0.123689
+## States32                                                                   0.110952
+## States33                                                                   0.124344
+## States34                                                                   0.106563
+## States35                                                                   0.107632
+## States36                                                                   0.092174
+## States37                                                                   0.100150
+## States38                                                                   0.119255
+## States39                                                                   0.096784
+## States40                                                                   0.106108
+## States41                                                                   0.104873
+## States42                                                                   0.099538
+## States44                                                                   0.128144
+## States45                                                                   0.108247
+## States46                                                                   0.122947
+## States47                                                                   0.102013
+## States48                                                                   0.083999
+## States49                                                                   0.104188
+## States50                                                                   0.112737
+## States51                                                                   0.110273
+## States53                                                                   0.107855
+## States54                                                                   0.103634
+## States55                                                                   0.114618
+## States56                                                                   0.108554
+## Family_Size2                                                               0.033913
+## Family_Size3                                                               0.037475
+## Family_Size4                                                               0.038988
+## Family_Size5                                                               0.043090
+## Family_Size6                                                               0.051246
+## Family_Size7                                                               0.070830
+## Family_Size8                                                               0.126878
+## Family_Size9                                                               0.124255
+## Family_Size10                                                              0.220860
+## Family_Size11                                                              0.207039
+## Family_Size12                                                              0.272052
+## Family_Size13                                                            108.225451
+## Family_Size14                                                            107.864499
+## Household_Income2                                                          0.094109
+## Household_Income3                                                          0.087367
+## Household_Income4                                                          0.078647
+## Household_Income5                                                          0.082194
+## Household_Income6                                                          0.069935
+## Household_Income7                                                          0.067253
+## Household_Income8                                                          0.067267
+## Household_Income9                                                          0.067201
+## Household_Income10                                                         0.066945
+## Household_Income11                                                         0.065828
+## Household_Income12                                                         0.066731
+## Household_Income13                                                         0.066568
+## Household_Income14                                                         0.067663
+## Household_Income15                                                         0.069746
+## Household_Income16                                                         0.074330
+## SNAP-2                                                                     0.247937
+## SNAP-1                                                                     0.197546
+## SNAP1                                                                      0.197077
+## SNAP2                                                                      0.196238
+## Citizenship_statusNATIVE, BORN IN PUERTO RICO OR OTHER U.S. ISLAND AREAS   0.149022
+## Citizenship_statusNATIVE, BORN ABROAD OF AMERICAN PARENT OR PARENTS        0.119072
+## Citizenship_statusFOREIGN BORN, U.S. CITIZEN BY NATURALIZATION             0.046381
+## Citizenship_statusFOREIGN BORN, NOT A CITIZEN OF THE UNITED STATES         0.043021
+## Number_of_Jobs2                                                            0.067387
+## Number_of_Jobs3                                                            0.218055
+## Number_of_Jobs4                                                           67.933909
+## Education_Level31                                                          0.190955
+## Education_Level32                                                          0.132543
+## Education_Level33                                                          0.105734
+## Education_Level34                                                          0.077744
+## Education_Level35                                                          0.066896
+## Education_Level36                                                          0.064002
+## Education_Level37                                                          0.060726
+## Education_Level38                                                          0.078190
+## Education_Level39                                                          0.031809
+## Education_Level40                                                          0.036712
+## Education_Level41                                                          0.059749
+## Education_Level42                                                          0.055597
+## Education_Level43                                                          0.040563
+## Education_Level44                                                          0.057953
+## Education_Level45                                                          0.152435
+## Education_Level46                                                          0.130923
+##                                                                          z value
+## (Intercept)                                                               -2.991
+## States2                                                                    0.486
+## States4                                                                   -2.806
+## States5                                                                    3.297
+## States6                                                                    1.077
+## States8                                                                   -0.106
+## States9                                                                   -1.787
+## States10                                                                   4.396
+## States11                                                                  -2.829
+## States12                                                                  -3.192
+## States13                                                                  -5.361
+## States15                                                                  -0.675
+## States16                                                                  -3.058
+## States17                                                                  -0.642
+## States18                                                                   1.681
+## States19                                                                   3.440
+## States20                                                                   0.890
+## States21                                                                  -1.956
+## States22                                                                   0.105
+## States23                                                                  -1.191
+## States24                                                                   4.603
+## States25                                                                  -0.617
+## States26                                                                   0.063
+## States27                                                                   1.492
+## States28                                                                   1.106
+## States29                                                                  -0.462
+## States30                                                                  -2.168
+## States31                                                                  -0.540
+## States32                                                                  -0.172
+## States33                                                                  -0.848
+## States34                                                                  -1.418
+## States35                                                                  -0.758
+## States36                                                                   1.143
+## States37                                                                  -0.501
+## States38                                                                   2.111
+## States39                                                                  -1.953
+## States40                                                                  -0.465
+## States41                                                                  -0.032
+## States42                                                                  -3.791
+## States44                                                                  -1.866
+## States45                                                                   2.982
+## States46                                                                   0.906
+## States47                                                                  -2.217
+## States48                                                                  -0.084
+## States49                                                                   0.454
+## States50                                                                   1.721
+## States51                                                                  -2.342
+## States53                                                                  -2.882
+## States54                                                                   0.576
+## States55                                                                  -2.280
+## States56                                                                   1.504
+## Family_Size2                                                              -4.139
+## Family_Size3                                                              -0.489
+## Family_Size4                                                               2.645
+## Family_Size5                                                              -3.162
+## Family_Size6                                                               0.688
+## Family_Size7                                                               3.873
+## Family_Size8                                                               5.971
+## Family_Size9                                                              -0.053
+## Family_Size10                                                             -8.008
+## Family_Size11                                                             -1.841
+## Family_Size12                                                              3.128
+## Family_Size13                                                             -0.125
+## Family_Size14                                                             -0.088
+## Household_Income2                                                          1.776
+## Household_Income3                                                          0.582
+## Household_Income4                                                         -1.861
+## Household_Income5                                                         -0.751
+## Household_Income6                                                         -4.723
+## Household_Income7                                                         -4.374
+## Household_Income8                                                         -4.800
+## Household_Income9                                                         -5.417
+## Household_Income10                                                        -8.346
+## Household_Income11                                                        -3.765
+## Household_Income12                                                        -3.432
+## Household_Income13                                                        -4.885
+## Household_Income14                                                        -3.584
+## Household_Income15                                                        -7.727
+## Household_Income16                                                       -12.262
+## SNAP-2                                                                     4.760
+## SNAP-1                                                                    -6.735
+## SNAP1                                                                     13.450
+## SNAP2                                                                      9.972
+## Citizenship_statusNATIVE, BORN IN PUERTO RICO OR OTHER U.S. ISLAND AREAS   2.081
+## Citizenship_statusNATIVE, BORN ABROAD OF AMERICAN PARENT OR PARENTS       -0.463
+## Citizenship_statusFOREIGN BORN, U.S. CITIZEN BY NATURALIZATION            -1.484
+## Citizenship_statusFOREIGN BORN, NOT A CITIZEN OF THE UNITED STATES         5.400
+## Number_of_Jobs2                                                            7.113
+## Number_of_Jobs3                                                            1.282
+## Number_of_Jobs4                                                           -0.172
+## Education_Level31                                                          3.149
+## Education_Level32                                                         -0.570
+## Education_Level33                                                          2.931
+## Education_Level34                                                         -0.061
+## Education_Level35                                                         -0.474
+## Education_Level36                                                          3.346
+## Education_Level37                                                          1.647
+## Education_Level38                                                          1.770
+## Education_Level39                                                          0.267
+## Education_Level40                                                          0.963
+## Education_Level41                                                          3.169
+## Education_Level42                                                         -2.075
+## Education_Level43                                                         -8.183
+## Education_Level44                                                         -9.290
+## Education_Level45                                                         -3.803
+## Education_Level46                                                         -5.101
+##                                                                          Pr(&gt;|z|)
+## (Intercept)                                                              0.002783
+## States2                                                                  0.627223
+## States4                                                                  0.005019
+## States5                                                                  0.000978
+## States6                                                                  0.281623
+## States8                                                                  0.915446
+## States9                                                                  0.073942
+## States10                                                                 1.10e-05
+## States11                                                                 0.004667
+## States12                                                                 0.001415
+## States13                                                                 8.29e-08
+## States15                                                                 0.499655
+## States16                                                                 0.002225
+## States17                                                                 0.520650
+## States18                                                                 0.092833
+## States19                                                                 0.000582
+## States20                                                                 0.373241
+## States21                                                                 0.050436
+## States22                                                                 0.916143
+## States23                                                                 0.233591
+## States24                                                                 4.16e-06
+## States25                                                                 0.537535
+## States26                                                                 0.949815
+## States27                                                                 0.135765
+## States28                                                                 0.268731
+## States29                                                                 0.643772
+## States30                                                                 0.030143
+## States31                                                                 0.589454
+## States32                                                                 0.863474
+## States33                                                                 0.396416
+## States34                                                                 0.156054
+## States35                                                                 0.448190
+## States36                                                                 0.253039
+## States37                                                                 0.616187
+## States38                                                                 0.034740
+## States39                                                                 0.050860
+## States40                                                                 0.641702
+## States41                                                                 0.974456
+## States42                                                                 0.000150
+## States44                                                                 0.062047
+## States45                                                                 0.002866
+## States46                                                                 0.364751
+## States47                                                                 0.026627
+## States48                                                                 0.933102
+## States49                                                                 0.649709
+## States50                                                                 0.085324
+## States51                                                                 0.019203
+## States53                                                                 0.003947
+## States54                                                                 0.564484
+## States55                                                                 0.022612
+## States56                                                                 0.132588
+## Family_Size2                                                             3.50e-05
+## Family_Size3                                                             0.625003
+## Family_Size4                                                             0.008178
+## Family_Size5                                                             0.001566
+## Family_Size6                                                             0.491320
+## Family_Size7                                                             0.000108
+## Family_Size8                                                             2.36e-09
+## Family_Size9                                                             0.957916
+## Family_Size10                                                            1.17e-15
+## Family_Size11                                                            0.065634
+## Family_Size12                                                            0.001761
+## Family_Size13                                                            0.900380
+## Family_Size14                                                            0.929532
+## Household_Income2                                                        0.075814
+## Household_Income3                                                        0.560651
+## Household_Income4                                                        0.062800
+## Household_Income5                                                        0.452624
+## Household_Income6                                                        2.32e-06
+## Household_Income7                                                        1.22e-05
+## Household_Income8                                                        1.59e-06
+## Household_Income9                                                        6.07e-08
+## Household_Income10                                                        &lt; 2e-16
+## Household_Income11                                                       0.000167
+## Household_Income12                                                       0.000599
+## Household_Income13                                                       1.03e-06
+## Household_Income14                                                       0.000338
+## Household_Income15                                                       1.10e-14
+## Household_Income16                                                        &lt; 2e-16
+## SNAP-2                                                                   1.94e-06
+## SNAP-1                                                                   1.64e-11
+## SNAP1                                                                     &lt; 2e-16
+## SNAP2                                                                     &lt; 2e-16
+## Citizenship_statusNATIVE, BORN IN PUERTO RICO OR OTHER U.S. ISLAND AREAS 0.037422
+## Citizenship_statusNATIVE, BORN ABROAD OF AMERICAN PARENT OR PARENTS      0.643089
+## Citizenship_statusFOREIGN BORN, U.S. CITIZEN BY NATURALIZATION           0.137689
+## Citizenship_statusFOREIGN BORN, NOT A CITIZEN OF THE UNITED STATES       6.65e-08
+## Number_of_Jobs2                                                          1.14e-12
+## Number_of_Jobs3                                                          0.199820
+## Number_of_Jobs4                                                          0.863132
+## Education_Level31                                                        0.001640
+## Education_Level32                                                        0.568871
+## Education_Level33                                                        0.003378
+## Education_Level34                                                        0.951718
+## Education_Level35                                                        0.635625
+## Education_Level36                                                        0.000821
+## Education_Level37                                                        0.099484
+## Education_Level38                                                        0.076659
+## Education_Level39                                                        0.789508
+## Education_Level40                                                        0.335337
+## Education_Level41                                                        0.001530
+## Education_Level42                                                        0.037945
+## Education_Level43                                                        2.77e-16
+## Education_Level44                                                         &lt; 2e-16
+## Education_Level45                                                        0.000143
+## Education_Level46                                                        3.38e-07
+##                                                                             
+## (Intercept)                                                              ** 
+## States2                                                                     
+## States4                                                                  ** 
+## States5                                                                  ***
+## States6                                                                     
+## States8                                                                     
+## States9                                                                  .  
+## States10                                                                 ***
+## States11                                                                 ** 
+## States12                                                                 ** 
+## States13                                                                 ***
+## States15                                                                    
+## States16                                                                 ** 
+## States17                                                                    
+## States18                                                                 .  
+## States19                                                                 ***
+## States20                                                                    
+## States21                                                                 .  
+## States22                                                                    
+## States23                                                                    
+## States24                                                                 ***
+## States25                                                                    
+## States26                                                                    
+## States27                                                                    
+## States28                                                                    
+## States29                                                                    
+## States30                                                                 *  
+## States31                                                                    
+## States32                                                                    
+## States33                                                                    
+## States34                                                                    
+## States35                                                                    
+## States36                                                                    
+## States37                                                                    
+## States38                                                                 *  
+## States39                                                                 .  
+## States40                                                                    
+## States41                                                                    
+## States42                                                                 ***
+## States44                                                                 .  
+## States45                                                                 ** 
+## States46                                                                    
+## States47                                                                 *  
+## States48                                                                    
+## States49                                                                    
+## States50                                                                 .  
+## States51                                                                 *  
+## States53                                                                 ** 
+## States54                                                                    
+## States55                                                                 *  
+## States56                                                                    
+## Family_Size2                                                             ***
+## Family_Size3                                                                
+## Family_Size4                                                             ** 
+## Family_Size5                                                             ** 
+## Family_Size6                                                                
+## Family_Size7                                                             ***
+## Family_Size8                                                             ***
+## Family_Size9                                                                
+## Family_Size10                                                            ***
+## Family_Size11                                                            .  
+## Family_Size12                                                            ** 
+## Family_Size13                                                               
+## Family_Size14                                                               
+## Household_Income2                                                        .  
+## Household_Income3                                                           
+## Household_Income4                                                        .  
+## Household_Income5                                                           
+## Household_Income6                                                        ***
+## Household_Income7                                                        ***
+## Household_Income8                                                        ***
+## Household_Income9                                                        ***
+## Household_Income10                                                       ***
+## Household_Income11                                                       ***
+## Household_Income12                                                       ***
+## Household_Income13                                                       ***
+## Household_Income14                                                       ***
+## Household_Income15                                                       ***
+## Household_Income16                                                       ***
+## SNAP-2                                                                   ***
+## SNAP-1                                                                   ***
+## SNAP1                                                                    ***
+## SNAP2                                                                    ***
+## Citizenship_statusNATIVE, BORN IN PUERTO RICO OR OTHER U.S. ISLAND AREAS *  
+## Citizenship_statusNATIVE, BORN ABROAD OF AMERICAN PARENT OR PARENTS         
+## Citizenship_statusFOREIGN BORN, U.S. CITIZEN BY NATURALIZATION              
+## Citizenship_statusFOREIGN BORN, NOT A CITIZEN OF THE UNITED STATES       ***
+## Number_of_Jobs2                                                          ***
+## Number_of_Jobs3                                                             
+## Number_of_Jobs4                                                             
+## Education_Level31                                                        ** 
+## Education_Level32                                                           
+## Education_Level33                                                        ** 
+## Education_Level34                                                           
+## Education_Level35                                                           
+## Education_Level36                                                        ***
+## Education_Level37                                                        .  
+## Education_Level38                                                        .  
+## Education_Level39                                                           
+## Education_Level40                                                           
+## Education_Level41                                                        ** 
+## Education_Level42                                                        *  
+## Education_Level43                                                        ***
+## Education_Level44                                                        ***
+## Education_Level45                                                        ***
+## Education_Level46                                                        ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 106940  on 42823  degrees of freedom
+## Residual deviance:  64687  on 42718  degrees of freedom
+## AIC: 64816
+## 
+## Number of Fisher Scoring iterations: 11</code></pre>
+<pre class="r"><code>logistic_model2.prob &lt;- predict(logistic_weighted, test, type = &quot;response&quot;)
+logistic_model2.pred = rep(&quot;Food Secure&quot;, dim(test)[1])
+logistic_model2.pred[logistic_model2.prob &gt; .5] = &quot;Food Insecure&quot;
+
+mean(logistic_model2.pred == test$FS_Status)</code></pre>
+<pre><code>## [1] 0.7350251</code></pre>
+<pre class="r"><code>table(logistic_model2.pred, test$FS_Status)</code></pre>
+<pre><code>##                     
+## logistic_model2.pred Food Secure Food Insecure
+##        Food Insecure        7445          2707
+##        Food Secure         18350           146</code></pre>
+<p>Our precision for this model is 0.2661545 Our recall for this model
+is 0.9470733</p>
+<ul>
+<li>As you can see even though our classification rate of the model went
+down and the precision of model went down drastically, we were able to
+raise our recall rate significantly.</li>
+</ul>
+</div>
 
 
 
