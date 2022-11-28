@@ -107,6 +107,8 @@ mean(logistic_model1.pred == test$FS_Status)
 
 table(logistic_model1.pred, test$FS_Status)
 ```
+Our precision for this model is `r 91/(91+94)`
+Our recall for this model is `r 91/(91+2762)`
 
 ```{r results='markup'}
 sum(test$FS_Status == "Food Secure")/sum(test$FS_Status == "Food Insecure")
@@ -120,3 +122,57 @@ sum(test$FS_Status == "Food Secure")/sum(test$FS_Status == "Food Insecure")
 * For the response variable imbalance we can create a new samples where the distribution between the responses is equal. Maybe something like k-fold Cross-Validation would work but I am not sure and would have to read more about it. 
 
 
+
+#### Starting off with the balancing the data in respect to the response.
+
+
+```{r, results='markup'}
+weight_minority_class = sum(FS_Subset$FS_Status == "Food Secure")/sum(FS_Subset$FS_Status == "Food Insecure")
+for(i in seq_len(NROW(FS_Subset))){
+  
+if(FS_Subset$FS_Status[i] == "Food Insecure"){
+  FS_Subset$Weight[i] = weight_minority_class
+
+}
+  else
+    FS_Subset$Weight[i] = 1
+}
+
+FS_Subset$Weight <- as.numeric(FS_Subset$Weight)
+summary(FS_Subset$Weight)
+
+## Splitting again because train and test doesn't contain the weight column
+
+set.seed(1)
+
+sample <- sample(c(TRUE, FALSE), nrow(FS_Subset), replace = TRUE, prob = c(0.6, 0.4))
+
+train <- FS_Subset[sample, ]
+test  <- FS_Subset[!sample, ]
+
+
+logistic_weighted <- glm(FS_Status ~ States + Family_Size + Household_Income + SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = train,  weights = Weight, family = "binomial")
+
+summary(logistic_weighted)
+
+
+
+
+
+
+```
+
+```{r, results='markup'}
+
+logistic_model2.prob <- predict(logistic_weighted, test, type = "response")
+logistic_model2.pred = rep("Food Secure", dim(test)[1])
+logistic_model2.pred[logistic_model2.prob > .5] = "Food Insecure"
+
+mean(logistic_model2.pred == test$FS_Status)
+
+table(logistic_model2.pred, test$FS_Status)
+```
+Our precision for this model is `r 2702/(2707+7445)`
+Our recall for this model is `r 2702/(2707+146)`
+
+* As you can see even though our classification rate of the model went down and the precision of model went down drastically, we were able to raise our recall rate significantly. 
