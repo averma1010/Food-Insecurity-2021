@@ -1004,8 +1004,16 @@ mean(logistic_model1.pred == test$FS_Status)</code></pre>
 ## logistic_model1.pred Food Secure Food Insecure
 ##        Food Insecure          94            91
 ##        Food Secure         25701          2762</code></pre>
-<p>Our precision for this model is 0.4918919 Our recall for this model
-is 0.0318962</p>
+<ul>
+<li><p>Our precision for this model is 0.4918919</p></li>
+<li><p>Our recall for this model is 0.0318962</p></li>
+<li><p>In my opinion, recall is more important to us as we want to get
+our fall negative down as much as possible. False positives are
+inclusion errors, while false negatives are exclusion errors. It’s
+better if we are able to more accurately identify who all are food
+insecure and need of aid rather than identifying who all are not food
+insecure and hence don’t need aid.</p></li>
+</ul>
 <pre class="r"><code>sum(test$FS_Status == &quot;Food Secure&quot;)/sum(test$FS_Status == &quot;Food Insecure&quot;)</code></pre>
 <pre><code>## [1] 9.04136</code></pre>
 <ul>
@@ -1027,9 +1035,9 @@ where the distribution between the responses is equal. Maybe something
 like k-fold Cross-Validation would work but I am not sure and would have
 to read more about it.</p></li>
 </ul>
-<div id="starting-off-with-the-balancing-the-data-in-respect-to-the-response." class="section level4">
-<h4>Starting off with the balancing the data in respect to the
-response.</h4>
+<div id="i-am-going-to-be-adding-weights-to-the-data-so-our-minority-class-which-is-food-insecurity-affects-the-model-more." class="section level4">
+<h4>I am going to be adding weights to the data so our minority class,
+which is food insecurity, affects the model more.</h4>
 <pre class="r"><code>weight_minority_class = sum(FS_Subset$FS_Status == &quot;Food Secure&quot;)/sum(FS_Subset$FS_Status == &quot;Food Insecure&quot;)
 for(i in seq_len(NROW(FS_Subset))){
   
@@ -1625,12 +1633,24 @@ mean(logistic_model2.pred == test$FS_Status)</code></pre>
 ## logistic_model2.pred Food Secure Food Insecure
 ##        Food Insecure        7445          2707
 ##        Food Secure         18350           146</code></pre>
-<p>Our precision for this model is 0.2661545 Our recall for this model
-is 0.9470733</p>
 <ul>
-<li>As you can see even though our classification rate of the model went
-down and the precision of model went down drastically, we were able to
-raise our recall rate significantly.</li>
+<li><p>Our precision for this model is 0.2661545</p></li>
+<li><p>Our recall for this model is 0.9470733</p></li>
+<li><p>As you can see even though our classification rate of the model
+went down and the precision of model went down drastically, we were able
+to raise our recall rate significantly.</p></li>
+</ul>
+<hr />
+<ul>
+<li><p>I think this is enough for logistic regression. We can try
+changing and adding more predictors, but largely i think this is enough.
+I wasn’t abe to add a lot of important predictors like ethnicity as the
+model was giving some errors. We should try to figure out how to solve
+it.</p></li>
+<li><p>We are going to try to random forests and KNN now.</p></li>
+<li><p>Working on the data is still our number 1 priority, if we can
+figure out factor selection and how to use the factors we can’t use rn,
+that would be more helpful than just getting the model to work.</p></li>
 </ul>
 </div>
 
