@@ -13,6 +13,7 @@ library(dplyr)
 library(ezids)
 library(ggplot2)
 library(epiR)
+library(pROC)
 ```
 
 * Lets start with the variables we selected for the first project. We should replace some variables I think, but we'll do it along the way. I am just copying code from the first project for now. so we can get a base to build upon.
@@ -113,6 +114,14 @@ table(logistic_model1.pred, test$FS_Status)
 
 * In my opinion, recall is more important to us as we want to get our fall negative down as much as possible. False positives are inclusion errors, while false negatives are exclusion errors. It's better if we are able to more accurately identify who all are food insecure and need of aid rather than identifying who all are not food insecure and hence don't need aid.
 
+```{r, results='markup'}
+test$logistic_model1.prob <- logistic_model1.prob
+roc_model1 <- roc(FS_Status ~ logistic_model1.prob, data = test)
+plot(roc_model1)
+auc(roc_model1)
+
+```
+
 ```{r results='markup'}
 sum(test$FS_Status == "Food Secure")/sum(test$FS_Status == "Food Insecure")
 
@@ -180,6 +189,15 @@ table(logistic_model2.pred, test$FS_Status)
 * Our recall for this model is `r 2702/(2707+146)`
 
 * As you can see even though our classification rate of the model went down and the precision of model went down drastically, we were able to raise our recall rate significantly. 
+
+```{r, results='markup'}
+test$logistic_model2.prob <- logistic_model2.prob
+roc_model2 <- roc(FS_Status ~ logistic_model2.prob, data = test)
+plot(roc_model2)
+auc(roc_model2)
+
+
+```
 
 
 ***
