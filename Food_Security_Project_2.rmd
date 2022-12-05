@@ -14,6 +14,8 @@ library(ezids)
 library(ggplot2)
 library(epiR)
 library(pROC)
+
+library(ggthemes)
 ```
 
 * Lets start with the variables we selected for the first project. We should replace some variables I think, but we'll do it along the way. I am just copying code from the first project for now. so we can get a base to build upon.
@@ -128,7 +130,6 @@ logistic_model1.prob <- predict(logistic, test, type = "response")
 logistic_model1.pred = rep("Food Secure", dim(test)[1])
 logistic_model1.pred[logistic_model1.prob > .5] = "Food Insecure"
 
-mean(logistic_model1.pred == test$FS_Status)
 
 table(logistic_model1.pred, test$FS_Status)
 ```
@@ -141,6 +142,20 @@ table(logistic_model1.pred, test$FS_Status)
 * Our recall for this model is `r  185/( 185+2623)`
 
 * In my opinion, recall is more important to us as we want to get our false negative down as much as possible. False positives are inclusion errors, while false negatives are exclusion errors. It's better if we are able to more accurately identify who all are food insecure and need of aid rather than identifying who all are not food insecure and hence don't need aid.
+
+```{r, results='markup'}
+train$logistic_model1_train.prob <- predict(logistic, train, type = "response")
+
+# distribution of the prediction score grouped by known outcome
+ggplot( train, aes( logistic_model1_train.prob, color = as.factor(FS_Status) ) ) + 
+geom_density( size = 1 ) +
+ggtitle( "Training Set's Predicted Score" ) + 
+scale_color_economist( name = "data", labels = c( "Food Secure", "Food Insecure" ) ) + 
+theme_economist()
+
+
+
+```
 
 ```{r, results='markup'}
 test$logistic_model1.prob <- logistic_model1.prob
@@ -225,8 +240,23 @@ plot(roc_model2)
 auc(roc_model2)
 
 
+
 ```
 
+
+```{r, results='markup'}
+
+train$logistic_model2_train.prob <- predict(logistic_weighted, train, type = "response")
+
+# distribution of the prediction score grouped by known outcome
+ggplot( train, aes( logistic_model2_train.prob, color = as.factor(FS_Status) ) ) + 
+geom_density( size = 1 ) +
+ggtitle( "Training Set's Predicted Score" ) + 
+scale_color_economist( name = "data", labels = c( "Food Secure", "Food Insecure" ) ) + 
+theme_economist()
+
+
+```
 
 ***
 
