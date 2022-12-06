@@ -14,7 +14,8 @@ library(ezids)
 library(ggplot2)
 library(epiR)
 library(pROC)
-
+library(smotefamily)
+library(ROSE)
 library(ggthemes)
 ```
 
@@ -223,7 +224,7 @@ logistic_model2.prob <- predict(logistic_weighted, test, type = "response")
 logistic_model2.pred = rep("Food Secure", dim(test)[1])
 logistic_model2.pred[logistic_model2.prob > .5] = "Food Insecure"
 
-mean(logistic_model2.pred == test$FS_Status)
+
 
 table(logistic_model2.pred, test$FS_Status)
 ```
@@ -265,6 +266,46 @@ theme_economist()
 * We are going to try to do random forests and KNN now.
 
 * Working on the data is still our number 1 priority, if we can figure out factor selection and how to use the factors we can't use rn, that would be more helpful than just getting the model to work.
+
+*** 
+
+* Trying to balance data by undersampling 
+
+```{r,results='markup'}
+
+data.balanced.ou <- ovun.sample(FS_Status~., data=train, p=0.5,  seed=1, method="over")$data
+
+
+
+
+```
+
+```{r, results = 'markup'}
+logistic_both <- glm(FS_Status ~ Ethnicity + States + Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = data.balanced.ou,   family = "binomial")
+
+```
+
+```{r, results='markup'}
+
+logistic_model3.prob <- predict(logistic_both, test, type = "response")
+logistic_model3.pred = rep("Food Secure", dim(test)[1])
+logistic_model3.pred[logistic_model3.prob > .5] = "Food Insecure"
+
+
+
+table(logistic_model3.pred, test$FS_Status)
+```
+
+```{r, results='markup'}
+train$logistic_model3_train.prob <- predict(logistic_both, train, type = "response")
+ggplot( train, aes( logistic_model3_train.prob, color = as.factor(FS_Status) ) ) + 
+geom_density( size = 1 ) +
+ggtitle( "Training Set's Predicted Score" ) + 
+scale_color_economist( name = "data", labels = c( "Food Secure", "Food Insecure" ) ) + 
+theme_economist()
+
+```
+
 
 ## K-Nearest Neighbours
 
