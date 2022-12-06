@@ -17,6 +17,7 @@ library(pROC)
 library(smotefamily)
 library(ROSE)
 library(ggthemes)
+library(caret)
 ```
 
 * Lets start with the variables we selected for the first project. We should replace some variables I think, but we'll do it along the way. I am just copying code from the first project for now. so we can get a base to build upon.
@@ -132,15 +133,23 @@ logistic_model1.pred = rep("Food Secure", dim(test)[1])
 logistic_model1.pred[logistic_model1.prob > .5] = "Food Insecure"
 
 
-table(logistic_model1.pred, test$FS_Status)
+tb <- table(logistic_model1.pred, test$FS_Status)
+tb
+
+
+precision <- round(precision(tb[1:2,2:1])*100,2)
+recall <- round(recall(tb[1:2,2:1])*100,1)
+
+
+lg_model_graph <- data.frame(precision , recall )
+p <- barplot(as.matrix(lg_model_graph),beside=TRUE, col=rgb(0.2,0.3,0.6,0.6), space = c(0.1, 0.1))
+text(x = p, y = lg_model_graph -  2, labels = lg_model_graph)
+
+
 ```
-* Our precision for this model is `r  166/( 166+145)`
 
-* Our recall for this model is `r  166/( 166+2642)`
 
-* Our precision for this model is `r  185/( 185+180)`
 
-* Our recall for this model is `r  185/( 185+2623)`
 
 * In my opinion, recall is more important to us as we want to get our false negative down as much as possible. False positives are inclusion errors, while false negatives are exclusion errors. It's better if we are able to more accurately identify who all are food insecure and need of aid rather than identifying who all are not food insecure and hence don't need aid.
 
@@ -166,12 +175,35 @@ auc(roc_model1)
 
 ```
 
+
+* Changing the cutoff
+
+
+```{r, results='markup'}
+logistic_model_ncf.prob <- predict(logistic, test, type = "response")
+logistic_model_ncf.pred = rep("Food Secure", dim(test)[1])
+logistic_model_ncf.pred[logistic_model1.prob > .09] = "Food Insecure"
+
+
+tb <- table(logistic_model_ncf.pred, test$FS_Status)
+tb
+
+
+precision <- round(precision(tb[1:2,2:1])*100,2)
+recall <- round(recall(tb[1:2,2:1])*100,1)
+
+
+lg_model_graph <- data.frame(precision , recall )
+p <- barplot(as.matrix(lg_model_graph),beside=TRUE, col=rgb(0.2,0.3,0.6,0.6), space = c(0.1, 0.1))
+text(x = p, y = lg_model_graph -  2, labels = lg_model_graph)
+```
+
 ```{r results='markup'}
 sum(test$FS_Status == "Food Secure")/sum(test$FS_Status == "Food Insecure")
 
 ```
 
-* So, our model has a 90% classification rate but the ratio of Food secure to Insecure in our data is 9.04. so this is a terrible model that's as good as tossing a coin. We will have to do something about the imbalance in our response and will have to clean our data further. Since all our variables are categorical of some kind, I highly recommend reading about categorical data modelling to figure out what to do.
+* So, our model has a 90% classification rate but the ratio of Food secure to Insecure in our data is 9.2. so this is a terrible model that's as good as tossing a coin. We will have to do something about the imbalance in our response and will have to clean our data further. Since all our variables are categorical of some kind, I highly recommend reading about categorical data modelling to figure out what to do.
 
 * I think doing one-hot encoding(dummy variable) will help in dealing with the level issues in our predictors. We should also combine similar levels so we can reduce the number of levels. also the negative values which correspond to not in the universe or similar have to be dealt with in someway. we can either choose to omit those observation or try to find a proxy for them. I will prefer the latter.
 
@@ -226,11 +258,23 @@ logistic_model2.pred[logistic_model2.prob > .5] = "Food Insecure"
 
 
 
-table(logistic_model2.pred, test$FS_Status)
-```
-* Our precision for this model is `r 2634/(2634+7540)`
+tb <- table(logistic_model2.pred, test$FS_Status)
+tb
 
-* Our recall for this model is `r 2634/(2634+174)`
+
+precision <- round(precision(tb[1:2,2:1])*100,2)
+recall <- round(recall(tb[1:2,2:1])*100,1)
+
+
+lg_model_graph <- data.frame(precision , recall )
+p <- barplot(as.matrix(lg_model_graph),beside=TRUE, col=rgb(0.2,0.3,0.6,0.6), space = c(0.1, 0.1))
+text(x = p, y = lg_model_graph -  2, labels = lg_model_graph)
+
+
+```
+* Our precision for this model is `r 2635/(2635+7474)`
+
+* Our recall for this model is `r 2635/(2635+173)`
 
 * As you can see even though our classification rate of the model went down and the precision of model went down drastically, we were able to raise our recall rate significantly. 
 
@@ -273,7 +317,7 @@ theme_economist()
 
 ```{r,results='markup'}
 
-data.balanced.ou <- ovun.sample(FS_Status~., data=train, p=0.5,  seed=1, method="over")$data
+data.balanced.ou <- ovun.sample(FS_Status~., data=train, p=0.5,  seed=1, method="under")$data
 
 
 
@@ -293,7 +337,19 @@ logistic_model3.pred[logistic_model3.prob > .5] = "Food Insecure"
 
 
 
-table(logistic_model3.pred, test$FS_Status)
+
+tb <- table(logistic_model3.pred, test$FS_Status)
+tb
+
+
+precision <- round(precision(tb[1:2,2:1])*100,2)
+recall <- round(recall(tb[1:2,2:1])*100,1)
+
+
+lg_model_graph <- data.frame(precision , recall )
+p <- barplot(as.matrix(lg_model_graph),beside=TRUE, col=rgb(0.2,0.3,0.6,0.6), space = c(0.1, 0.1))
+text(x = p, y = lg_model_graph -  2, labels = lg_model_graph)
+
 ```
 
 ```{r, results='markup'}
