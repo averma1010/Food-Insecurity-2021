@@ -14,8 +14,7 @@ library(ezids)
 library(ggplot2)
 library(epiR)
 library(pROC)
-library(smotefamily)
-library(ROSE)
+
 library(ggthemes)
 ```
 
@@ -224,7 +223,7 @@ logistic_model2.prob <- predict(logistic_weighted, test, type = "response")
 logistic_model2.pred = rep("Food Secure", dim(test)[1])
 logistic_model2.pred[logistic_model2.prob > .5] = "Food Insecure"
 
-
+mean(logistic_model2.pred == test$FS_Status)
 
 table(logistic_model2.pred, test$FS_Status)
 ```
@@ -267,45 +266,6 @@ theme_economist()
 
 * Working on the data is still our number 1 priority, if we can figure out factor selection and how to use the factors we can't use rn, that would be more helpful than just getting the model to work.
 
-*** 
-
-* Trying to balance data by undersampling 
-
-```{r,results='markup'}
-
-data.balanced.ou <- ovun.sample(FS_Status~., data=train, N=nrow(train), p=0.5,  seed=1, method="both")$data
-
-
-
-
-```
-
-```{r, results = 'markup'}
-logistic_both <- glm(FS_Status ~ Ethnicity + States + Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = data.balanced.ou,   family = "binomial")
-
-```
-
-```{r, results='markup'}
-
-logistic_model3.prob <- predict(logistic_both, test, type = "response")
-logistic_model3.pred = rep("Food Secure", dim(test)[1])
-logistic_model3.pred[logistic_model3.prob > .5] = "Food Insecure"
-
-
-
-table(logistic_model3.pred, test$FS_Status)
-```
-
-```{r, results='markup'}
-train$logistic_model3_train.prob <- predict(logistic_both, train, type = "response")
-ggplot( train, aes( logistic_model3_train.prob, color = as.factor(FS_Status) ) ) + 
-geom_density( size = 1 ) +
-ggtitle( "Training Set's Predicted Score" ) + 
-scale_color_economist( name = "data", labels = c( "Food Secure", "Food Insecure" ) ) + 
-theme_economist()
-
-```
-
 ## K-Nearest Neighbours
 
 Here we will try to create a prediction model using KNN Algorithm and we hope to see a model with more accuracy and precision. 
@@ -315,6 +275,8 @@ Here we will try to create a prediction model using KNN Algorithm and we hope to
 ```{r, results='markup'}
 str(FS_Subset)
 ```
+
+
 
 ```{r, results='markup'}
 knn_data <- FS_Subset
@@ -329,6 +291,33 @@ num_data <- select_if(knn_data, is.numeric)
 num_data <- as.data.frame(num_data[-c(7)])
 str(num_data)
 
+```
+
+
+```{r, results='markup'}
+num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 1, 3)
+num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 2, 1)
+num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 3, 2)
+
+
+head(num_data)
+tail(num_data)
+```
+
+
+```{r}
+library(ROSE)
+```
+
+```{r, results='markup'}
+data_balanced_under <- as.data.frame(ovun.sample(FS_Status ~ ., data = num_data, method = "both", N = nrow(num_data), seed = 1)$data)
+table(data_balanced_under$cls)
+```
+```{r,results='markup'}
+str(data_balanced_under)
+head(data_balanced_under)
+tail(data_balanced_under)
+num_data <- data_balanced_under
 ```
 
 First we want to scale and center the data to ensure KNN will operate correctly.
@@ -358,27 +347,14 @@ knn.testLabels <- num_data[knn_sample==2, 6]
 ```
 
 ```{r}
-# Installing Packages
-install.packages("e1071")
-install.packages("caTools")
-install.packages("class")
-  
 # Loading package
 library(e1071)
 library(caTools)
-```
-```{r}
 library(class)
 loadPkg("gmodels")
 loadPkg("gmodels")
 loadPkg("FNN")
 loadPkg("caret")
-knn.5 <- knn(train=nasa_train, test=nasa_test, cl=nasa_train.labels, k=5)
-ACC.5=100 * sum(nasa_test.labels == knn.5)/NROW(nasa_test.labels)
-paste0("Accuracy = ", ACC.5)
-print(confusionMatrix(knn.5, as.factor(nasa_test.labels) ))
-
-
 ```
 
 # Building Models
@@ -386,7 +362,7 @@ print(confusionMatrix(knn.5, as.factor(nasa_test.labels) ))
 ```{r, results='markup'}
 library(class)
 knn_pred <- knn(train = knn_training, test = knn_test, cl=knn.trainLabels, k=3)
-knn_pred
+#knn_pred
 ```
 
 ```{r, results='markup'}
