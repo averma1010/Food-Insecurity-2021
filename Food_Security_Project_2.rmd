@@ -218,6 +218,8 @@ Here we will try to create a prediction model using KNN Algorithm and we hope to
 str(FS_Subset)
 ```
 
+
+
 ```{r, results='markup'}
 knn_data <- FS_Subset
 knn_data$Family_Size <- as.numeric(FS_Subset$Family_Size)
@@ -231,6 +233,33 @@ num_data <- select_if(knn_data, is.numeric)
 num_data <- as.data.frame(num_data[-c(7)])
 str(num_data)
 
+```
+
+
+```{r, results='markup'}
+num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 1, 3)
+num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 2, 1)
+num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 3, 2)
+
+
+head(num_data)
+tail(num_data)
+```
+
+
+```{r}
+library(ROSE)
+```
+
+```{r, results='markup'}
+data_balanced_under <- as.data.frame(ovun.sample(FS_Status ~ ., data = num_data, method = "both", N = nrow(num_data), seed = 1)$data)
+table(data_balanced_under$cls)
+```
+```{r,results='markup'}
+str(data_balanced_under)
+head(data_balanced_under)
+tail(data_balanced_under)
+num_data <- data_balanced_under
 ```
 
 First we want to scale and center the data to ensure KNN will operate correctly.
@@ -260,27 +289,14 @@ knn.testLabels <- num_data[knn_sample==2, 6]
 ```
 
 ```{r}
-# Installing Packages
-install.packages("e1071")
-install.packages("caTools")
-install.packages("class")
-  
 # Loading package
 library(e1071)
 library(caTools)
-```
-```{r}
 library(class)
 loadPkg("gmodels")
 loadPkg("gmodels")
 loadPkg("FNN")
 loadPkg("caret")
-knn.5 <- knn(train=nasa_train, test=nasa_test, cl=nasa_train.labels, k=5)
-ACC.5=100 * sum(nasa_test.labels == knn.5)/NROW(nasa_test.labels)
-paste0("Accuracy = ", ACC.5)
-print(confusionMatrix(knn.5, as.factor(nasa_test.labels) ))
-
-
 ```
 
 # Building Models
@@ -288,7 +304,7 @@ print(confusionMatrix(knn.5, as.factor(nasa_test.labels) ))
 ```{r, results='markup'}
 library(class)
 knn_pred <- knn(train = knn_training, test = knn_test, cl=knn.trainLabels, k=3)
-knn_pred
+#knn_pred
 ```
 
 ```{r, results='markup'}
