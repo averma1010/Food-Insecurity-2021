@@ -6,7 +6,6 @@ Food_Sec <- data.frame(read.csv("dec21pub.csv"))
 ```
 
 
-
 ```{r, echo=FALSE, results='hide', message=FALSE}
 library(dplyr)
 library(ezids)
@@ -282,12 +281,13 @@ str(FS_Subset)
 knn_data <- FS_Subset
 knn_data$Family_Size <- as.numeric(FS_Subset$Family_Size)
 knn_data$Household_Income <- as.numeric(FS_Subset$Household_Income)
+knn_data$SNAP <- as.numeric(FS_Subset$SNAP)
 knn_data$Number_of_Jobs <- as.numeric(FS_Subset$Number_of_Jobs)
 knn_data$Hours_on_Jobs <- as.numeric(FS_Subset$Hours_on_Jobs)
 knn_data$Number_of_children <- as.numeric(FS_Subset$Number_of_children)
 knn_data$FS_Status <- as.numeric(FS_Subset$FS_Status)
 num_data <- select_if(knn_data, is.numeric)
-num_data <- as.data.frame(num_data[-c(7)])
+num_data <- as.data.frame(num_data[-c(8)])
 str(num_data)
 ```
 
@@ -332,15 +332,15 @@ knn_sample <- sample(2, nrow(scaledata), replace=TRUE, prob=c(0.67, 0.33))
 We then just need to use the new variable to create the test/train outputs, selecting the first four rows as they are the numeric data in the iris data set and we want to predict Species.
 
 ```{r, results='markup'}
-knn_training <- scaledata[knn_sample==1, 1:5]
-knn_test <- scaledata[knn_sample==2, 1:5]
+knn_training <- scaledata[knn_sample==1, 1:6]
+knn_test <- scaledata[knn_sample==2, 1:6]
 ```
 
 Now we need to create our Y variables or labels need to input into the KNN function.
 
 ```{r, results='markup'}
-knn.trainLabels <- num_data[knn_sample==1, 6]
-knn.testLabels <- num_data[knn_sample==2, 6]
+knn.trainLabels <- num_data[knn_sample==1, 7]
+knn.testLabels <- num_data[knn_sample==2, 7]
 ```
 
 ```{r}
@@ -363,17 +363,19 @@ knn_pred <- knn(train = knn_training, test = knn_test, cl=knn.trainLabels, k=3)
 ```
 
 ```{r, results='markup'}
-knn_crosst <- gmodels::CrossTable(knn.testLabels, train = knn_pred, prop.chisq = FALSE)
+knn_crosst <- gmodels::CrossTable(x = knn.testLabels, y = knn_pred, prop.chisq = FALSE)
 ```
+The test data consisted of 23430 observations. Out of which 8285 cases have been accurately predicted (TN->True Negatives) as Food Secure in nature which constitutes 35.36%. Also, 8083 out of 23430 observations were accurately predicted (TP-> True Positives) as Food Insecure in nature which constitutes 34.49%. Thus a total of 8083 out of 23430 predictions where TP i.e, True Positive in nature.
+
+There were 3644 cases of False Negatives (FN). The FN’s poses a potential threat for the reason that model predicts 15.55% of the total observations as Food Secure, but was actually food insecure and the main focus to increase the accuracy of the model is to reduce FN’s.
+
+There were 8083 cases of False Positives (FP) meaning 8083 cases were actually food secure in nature but got predicted as food insecure.
+
+The total accuracy of the model is 69.85 %( (TN+TP)/35) which shows that there may be chances to improve the model performance.
 
 ```{r, results='markup'}
 # create an empty dataframe to store the results from confusion matrices
 ResultDf = data.frame( k=numeric(0), Total.Accuracy= numeric(0), row.names = NULL )
-kval = 3
-knn_pred <- knn(train = knn_training, test = knn_test, cl=knn.trainLabels, k=kval)
-knn_crosst <- gmodels::CrossTable(knn.testLabels, train = knn_pred, prop.chisq = FALSE)
-print( paste("k = ", kval) )
-knn_crosst
 ```
 
 
@@ -386,7 +388,8 @@ cmaccu = cm$overall['Accuracy']
 print( paste("Total Accuracy = ", cmaccu ) )
 # print("Other metrics : ")
 # print(cm$byClass)
-# 
+
+kval = 3
 cmt = data.frame(k=kval, Total.Accuracy = cmaccu, row.names = NULL ) # initialize a row of the metrics 
 # cmt = cbind( cmt, data.frame( t(cm$byClass) ) ) # the dataframe of the transpose, with k valued added in front
 ResultDf = rbind(ResultDf, cmt)
