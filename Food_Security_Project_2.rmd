@@ -118,8 +118,7 @@ str(train)
 
 
 ```{r, results='markup'}
-logistic <- glm(FS_Status ~ Ethnicity + States + Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = train, family = "binomial")
-
+logistic <- glm(FS_Status ~ Ethnicity + Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = train, family = "binomial")
 
 
 ```
@@ -244,7 +243,7 @@ test  <- FS_Subset[!sample, ]
 
 ```{r, results='markup'}
 
-logistic_weighted <- glm(FS_Status ~ Ethnicity + States + Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = train,  weights = Weight, family = "binomial")
+logistic_weighted <- glm(FS_Status ~ Ethnicity +  Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = train,  weights = Weight, family = "binomial")
 
 
 ```
@@ -325,7 +324,7 @@ data.balanced.ou <- ovun.sample(FS_Status~., data=train, p=0.5,  seed=1, method=
 ```
 
 ```{r, results = 'markup'}
-logistic_both <- glm(FS_Status ~ Ethnicity + States + Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = data.balanced.ou,   family = "binomial")
+logistic_both <- glm(FS_Status ~ Ethnicity +  Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = data.balanced.ou,   family = "binomial")
 
 ```
 
