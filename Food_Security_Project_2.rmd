@@ -454,5 +454,17 @@ plotcp(tree1)
 
 rpart.plot(tree1)
 ```
+```{r}
+library("ISLR")
+library("tree") 
 
+treefit <- tree(FS_Status ~ Ethnicity+Education_Level+Household_Income, data=test)
+summary(treefit)
+```
 
+```{r}
+library(RColorBrewer)
+library(rattle)
+plot(treefit) 
+text(treefit,cex=1)
+```
