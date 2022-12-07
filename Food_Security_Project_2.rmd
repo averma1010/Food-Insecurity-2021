@@ -488,8 +488,8 @@ accuracy_tune <- function(tree1) {
 }
 
 
-control <- rpart.control(minsplit = 3,
-    minbucket = round(5 / 3),
+control <- rpart.control(minsplit = 1,
+    minbucket = round(5 / 2),
     maxdepth = 3,
     cp = 0)
 tune_fit <- rpart(FS_Status ~ Ethnicity + Family_Size + Household_Income + SNAP + Citizenship_status + Number_of_Jobs + Education_Level , data = data.balanced.ou, method = 'class', control = control)
@@ -512,58 +512,20 @@ rpart.plot(tree2)
 
 ```
 
-```{r, results='markup'}
-tree <- makeLearner("classif.rpart")
-getParamSet(tree)
 
-treeParamSpace <- makeParamSet(
-  makeIntegerParam("minsplit", lower = 5, upper = 20),
-  makeIntegerParam("minbucket", lower = 3, upper = 10),
-  makeNumericParam("cp", lower = 0.01, upper = 0.1),
-  makeIntegerParam("maxdepth", lower = 3, upper = 10))
+```{r,results='markup'}
+predict_unseen <-predict(tree2, test, type = 'class')
 
-randSearch <- makeTuneControlRandom(maxit = 200)
-cvForTuning <- makeResampleDesc("CV", iters = 5)
+table_mat <- table(test$FS_Status, predict_unseen)
+table_mat
 
 ```
 
-```{r, results='markup'}
-set.seed(314)
-
-churn_folds <- vfold_cv(data.balanced.ou, v = 5)
-
-Tree_model <- decision_tree(cost_complexity = tune(), tree_depth = tune(), min_n = tune()) %>% set_engine('rpart') %>%  set_mode('classification')
-
-churn_recipe <- recipe(FS_Status ~ ., data = data.balanced.ou) %>% 
-                       step_YeoJohnson(all_numeric(), -all_outcomes()) %>% 
-                       step_normalize(all_numeric(), -all_outcomes()) %>% 
-                       step_dummy(all_nominal(), -all_outcomes())
 
 
-tree_workflow <- workflow() %>% add_model(Tree_model) %>% add_recipe(churn_recipe)
-```
 
-```{r, results='markup'}
-tree_grid <- grid_regular(cost_complexity(),
-                          tree_depth(),
-                          min_n(), 
-                          levels = 2)
 
-set.seed(314)
 
-tree_tuning <- tree_workflow %>% 
-               tune_grid(resamples = churn_folds,
-                         grid = tree_grid)
-tree_tuning %>% show_best('roc_auc')
 
-```
 
-```{r, results='markup'}
-best_tree <- tree_tuning %>% 
-             select_best(metric = 'roc_auc')
-final_tree_workflow <- tree_workflow %>% 
-                       finalize_workflow(best_tree)
 
-tree_wf_fit <- final_tree_workflow %>% 
-               fit(data = data.balanced.ou)
-```
