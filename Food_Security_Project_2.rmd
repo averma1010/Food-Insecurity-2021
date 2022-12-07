@@ -437,3 +437,10 @@ for (kval in 4:11) {
 ```{r, results='markup'}
 xkabledply(ResultDf, "Total Accuracy Summary")
 ```
+
+```{r, results='markup'}
+ggplot(ResultDf,aes(x = k, y = Total.Accuracy)) +
+  geom_line(color = "orange", size = 1.5) +
+  geom_point(size = 3) + 
+  labs(title = "accuracy vs k")
+```
