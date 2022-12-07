@@ -436,13 +436,14 @@ library("caret")
 library("dplyr")
 library("data.tree")
 library("caTools")
+library("rpart.plot")
 
 ```
 #Using Decision Tree
 
 
 ```{r, echo = T, fig.dim=c(6,4)}
-tree1 <- rpart(FS_Status ~ Ethnicity, data=test, method="class")
+tree1 <- rpart(FS_Status ~ Ethnicity+Household_Income, data=test, method="class")
 printcp(tree1) # display the results 
 plotcp(tree1) # visualize cross-validation results 
 summary(tree1) # detailed summary of splits
@@ -451,6 +452,7 @@ summary(tree1) # detailed summary of splits
 plotcp(tree1)
 #text(tree1, use.n=TRUE, all=TRUE, cex=.8)
 
+rpart.plot(tree1)
 ```
 
 
