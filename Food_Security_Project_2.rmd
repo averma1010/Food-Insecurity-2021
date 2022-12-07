@@ -410,7 +410,8 @@ print( xkabledply(data.frame(cm$byClass), title=paste("k = ",kval)) )
 
 # Different K-values
 ```{r, results='markup'}
-for (kval in 4:11) {
+for (kval in 4:11) 
+  {
   knn_pred <- knn(train = knn_training, test = knn_test, cl=knn.trainLabels, k=kval)
   knn_crosst <- CrossTable(knn.testLabels, knn_pred, prop.chisq = FALSE)
   print( paste("k = ", kval) )
@@ -420,7 +421,7 @@ for (kval in 4:11) {
   # print.confusionMatrix(cm)
   # 
   cmaccu = cm$overall['Accuracy']
-  print( paste("Total Accuracy = ", cmaccu ) )
+  #print( paste("Total Accuracy = ", cmaccu ) )
   # print("Other metrics : ")
   # print(cm$byClass)
   # 
@@ -429,7 +430,7 @@ for (kval in 4:11) {
   ResultDf = rbind(ResultDf, cmt)
   print( xkabledply(   as.matrix(cm), title = paste("ConfusionMatrix for k = ",kval ) ) )
   print( xkabledply(data.frame(cm$byClass), title=paste("k = ",kval)) )
-}
+  }
 ```
 
 ```{r, results='markup'}
