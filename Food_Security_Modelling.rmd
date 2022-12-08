@@ -1,13 +1,44 @@
-* Hi, this is the rmd file for project 2. We will be doing logistic regression to model food insecurity
+
+# Project: An Analysis of Food Security in USA - 2021
 
 
 
+### DATS 6101: INTRODUCTION TO DATA SCIENCE
+
+#### TEAM: Akshay Verma, Aveline Mariya Shaji and Uugangerel Bold
+
+This file is the second part to the Exploratory Data Analysis of the Analysis of Food Security in USA - 2021
+We will be doing different classification techniques/models to predict the food insecurity. 
+
+## The models/techniques that we have used here are:
+
+ -- Logistic Regression
+ 
+ -- KNN Algorithm
+ 
+ -- Decision Tree
+
+
+## Our SMART questions are below: 
+
+--	Specific: To extend the EDA on the Census data to find out what combinations of socio-economic factors lead to food insecurity. 
+
+--	Measurable: Measure the risk of food insecurity at different combinations of selected factors.
+
+--	Achievable: Make a prediction model using logistic regression for the food insecurity. Extend the modelling using KNN and Random Forest.
+
+--	Relevant: Food being the basic requirement of any human, this study can shed light on what the authorities and we ourselves can do in order to eradicate food insecurity.
+
+--	Time-Oriented: Data set for the month of December 2021 is considered for the study and the study is expected to come-up with interesting results by early December 2022.
+
+
+We start with loading our data.
 ```{r, echo=FALSE, cache=TRUE }
 Food_Sec <- data.frame(read.csv("dec21pub.csv"))
 ```
 
 
-
+Now we load our libraries. We will be adding more libraries on the go as and when need for the analysis and modelling.
 ```{r, echo=FALSE, results='hide', message=FALSE}
 library(dplyr)
 library(ezids)
@@ -120,10 +151,6 @@ str(train)
 
 ```{r, results='markup'}
 logistic <- glm(FS_Status ~ Ethnicity +  Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = train, family = "binomial")
-
-
-
-
 ```
 
 * predicting on the testing data and finding the mean squared error for this model.
@@ -395,6 +422,8 @@ str(num_data)
 num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 1, 3)
 num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 2, 1)
 num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 3, 2)
+num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 2, 0)
+
 head(num_data)
 tail(num_data)
 ```
@@ -463,13 +492,12 @@ knn_pred <- knn(train = knn_training, test = knn_test, cl=knn.trainLabels, k=3)
 ```{r, results='markup'}
 knn_crosst <- gmodels::CrossTable(x = knn.testLabels, y = knn_pred, prop.chisq = FALSE)
 ```
-The test data consisted of 23430 observations. Out of which 8285 cases have been accurately predicted (TN->True Negatives) as Food Secure in nature which constitutes 35.36%. Also, 8083 out of 23430 observations were accurately predicted (TP-> True Positives) as Food Insecure in nature which constitutes 34.49%. Thus a total of 8083 out of 23430 predictions where TP i.e, True Positive in nature.
-
-There were 3644 cases of False Negatives (FN). The FN’s poses a potential threat for the reason that model predicts 15.55% of the total observations as Food Secure, but was actually food insecure and the main focus to increase the accuracy of the model is to reduce FN’s.
-
-There were 8083 cases of False Positives (FP) meaning 8083 cases were actually food secure in nature but got predicted as food insecure.
-
-The total accuracy of the model is 69.85 %( (TN+TP)/35) which shows that there may be chances to improve the model performance.
+Total Number of Observations = 23430.
+True Negative = 11040 :- 47% of the observations were correctly predicted as NOT Food Insecure
+True Positive = 8537 :- 36.45% are correctly identified as Food Insecure.
+There were 3164 cases of False Negatives (FN). The FN’s poses a potential threat for the reason that model predicts 13.50% of the total observations as Food Secure, but was actually food insecure and the main focus to increase the accuracy of the model is to reduce FN’s.
+There were 679 cases of False Positives (FP) meaning 679 cases were actually food secure in nature but got predicted as food insecure. 
+The total accuracy of the model is 83.59 % ((TN+TP)/Total) which shows that the model is good. But still there is scope of improvement.
 
 ```{r, results='markup'}
 # create an empty dataframe to store the results from confusion matrices
@@ -536,12 +564,22 @@ xkabledply(ResultDf, "Total Accuracy Summary")
 
 ```{r, results='markup'}
 ggplot(ResultDf,aes(x = k, y = Total.Accuracy)) +
-  geom_line(color = "orange", size = 1.5) +
+  geom_line(color = "maroon", size = 1.5) +
   geom_point(size = 3) + 
-  labs(title = "accuracy vs k")
+  labs(title = "Accuracy vs k")
+```
+```{r, results='markup'}
+library(class)
+knn_pred <- knn(train = knn_training, test = knn_test, cl=knn.trainLabels, k=6)
+#knn_pred
 ```
 
-
+```{r, results='markup'}
+knn_crosst <- gmodels::CrossTable(x = knn.testLabels, y = knn_pred, prop.chisq = FALSE)
+```
+```{r, results='markup'}
+xkabledply(data.frame(cm$byClass), title=paste("k = ",6))
+```
 ## Trees
 
 ```{r}
