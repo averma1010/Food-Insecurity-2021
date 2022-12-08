@@ -1,4 +1,10 @@
-* Hi, this is the rmd file for project 2. We will be doing logistic regression to model food insecurity
+## DATS 6101: INTRODUCTION TO DATA SCIENCE
+
+# Project: An Analysis of Food Security in USA - 2021
+
+## TEAM: Akshay Verma, Aveline Mariya Shaji and Uugangerel Bold
+
+ Hi, this is the rmd file for project 2. We will be doing logistic regression to model food insecurity
 
 
 
