@@ -122,6 +122,7 @@ logistic <- glm(FS_Status ~ Ethnicity +  Family_Size + Household_Income:SNAP + C
 
 
 
+
 ```
 
 * predicting on the testing data and finding the mean squared error for this model.
@@ -566,8 +567,11 @@ summary(tree1) # detailed summary of splits
 plotcp(tree1)
 #text(tree1, use.n=TRUE, all=TRUE, cex=.8)
 rpart.plot(tree1)
-```
 
+predict_unseen <-predict(tree1, test, type = 'class')
+table_mat <- table(test$FS_Status, predict_unseen)
+table_mat
+```
 
 
 
@@ -578,10 +582,10 @@ accuracy_tune <- function(tree1) {
     accuracy_Test <- sum(diag(table_mat)) / sum(table_mat)
     accuracy_Test
 }
-control <- rpart.control(minsplit = 3,
+control <- rpart.control(minsplit = 4,
     minbucket = round(5 / 3),
     maxdepth = 3,
-    cp = 0)
+    cp = 0.0001)
 tune_fit <- rpart(FS_Status ~ Ethnicity + Family_Size + Household_Income + SNAP + Citizenship_status + Number_of_Jobs + Education_Level , data = data.balanced.ou, method = 'class', control = control)
 accuracy_tune(tune_fit)
 ```
@@ -595,5 +599,11 @@ summary(tree2) # detailed summary of splits
 plotcp(tree2)
 #text(tree1, use.n=TRUE, all=TRUE, cex=.8)
 rpart.plot(tree2)
+```
+
+```{r, results='markup'}
+predict_unseen <-predict(tree2, test, type = 'class')
+table_mat <- table(predict_unseen, test$FS_Status)
+table_mat[2:1,2:1]
 ```
 
