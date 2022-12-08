@@ -463,7 +463,7 @@ knn_pred <- knn(train = knn_training, test = knn_test, cl=knn.trainLabels, k=3)
 ```{r, results='markup'}
 knn_crosst <- gmodels::CrossTable(x = knn.testLabels, y = knn_pred, prop.chisq = FALSE)
 ```
-The test data consisted of 23430 observations. Out of which 8285 cases have been accurately predicted (TN->True Negatives) as Food Secure in nature which constitutes 35.36%. Also, 8083 out of 23430 observations were accurately predicted (TP-> True Positives) as Food Insecure in nature which constitutes 34.49%. Thus a total of 8083 out of 23430 predictions where TP i.e, True Positive in nature.
+The test data consisted of 23430 observations. Out of which 8285 cases have been accurately predicted (TN->True Negatives) as Food Secure in nature which constitutes 35.36%. Also, 9052 out of 23430 observations were accurately predicted (TP-> True Positives) as Food Insecure in nature which constitutes 38.65%. Thus a total of 8083 out of 23430 predictions where TP i.e, True Positive in nature.
 
 There were 3644 cases of False Negatives (FN). The FN’s poses a potential threat for the reason that model predicts 15.55% of the total observations as Food Secure, but was actually food insecure and the main focus to increase the accuracy of the model is to reduce FN’s.
 
@@ -540,8 +540,18 @@ ggplot(ResultDf,aes(x = k, y = Total.Accuracy)) +
   geom_point(size = 3) + 
   labs(title = "Accuracy vs k")
 ```
+```{r, results='markup'}
+library(class)
+knn_pred <- knn(train = knn_training, test = knn_test, cl=knn.trainLabels, k=6)
+#knn_pred
+```
 
-
+```{r, results='markup'}
+knn_crosst <- gmodels::CrossTable(x = knn.testLabels, y = knn_pred, prop.chisq = FALSE)
+```
+```{r, results='markup'}
+xkabledply(data.frame(cm$byClass), title=paste("k = ",6))
+```
 ## Trees
 
 ```{r}
