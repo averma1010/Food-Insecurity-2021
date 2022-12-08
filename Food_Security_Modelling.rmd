@@ -1,19 +1,44 @@
-## DATS 6101: INTRODUCTION TO DATA SCIENCE
 
 # Project: An Analysis of Food Security in USA - 2021
 
-## TEAM: Akshay Verma, Aveline Mariya Shaji and Uugangerel Bold
-
- Hi, this is the rmd file for project 2. We will be doing logistic regression to model food insecurity
 
 
+### DATS 6101: INTRODUCTION TO DATA SCIENCE
 
+#### TEAM: Akshay Verma, Aveline Mariya Shaji and Uugangerel Bold
+
+This file is the second part to the Exploratory Data Analysis of the Analysis of Food Security in USA - 2021
+We will be doing different classification techniques/models to predict the food insecurity. 
+
+## The models/techniques that we have used here are:
+
+ -- Logistic Regression
+ 
+ -- KNN Algorithm
+ 
+ -- Decision Tree
+
+
+## Our SMART questions are below: 
+
+--	Specific: To extend the EDA on the Census data to find out what combinations of socio-economic factors lead to food insecurity. 
+
+--	Measurable: Measure the risk of food insecurity at different combinations of selected factors.
+
+--	Achievable: Make a prediction model using logistic regression for the food insecurity. Extend the modelling using KNN and Random Forest.
+
+--	Relevant: Food being the basic requirement of any human, this study can shed light on what the authorities and we ourselves can do in order to eradicate food insecurity.
+
+--	Time-Oriented: Data set for the month of December 2021 is considered for the study and the study is expected to come-up with interesting results by early December 2022.
+
+
+We start with loading our data.
 ```{r, echo=FALSE, cache=TRUE }
 Food_Sec <- data.frame(read.csv("dec21pub.csv"))
 ```
 
 
-
+Now we load our libraries. We will be adding more libraries on the go as and when need for the analysis and modelling.
 ```{r, echo=FALSE, results='hide', message=FALSE}
 library(dplyr)
 library(ezids)
