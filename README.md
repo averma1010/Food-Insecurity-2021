@@ -1,7 +1,7 @@
 An Analysis of Food Security in USA - 2021
 ==========================================
 
-Hi, this is the final prokect I did for my Intro to Data Science class at GW. We are trying to Classify Food Security in the United States. This is a typical classification problem with an imbalanced response class.
+Hi, this is the final project I did for my Intro to Data Science class at GW. We are trying to Classify Food Security in the United States. This is a typical classification problem with an imbalanced response class.
 
 We are using the CPS Data provided by the US Census Bureau. Since I was constrained by time, I couldn't do EDA on the dataset to an satisfactory level and had to select factors that made an intuitive sense. This lead to some problems in the classification as you'll see.
 
