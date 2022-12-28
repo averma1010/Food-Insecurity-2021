@@ -1,647 +1,674 @@
----
-title: "An Analysis of Food Security in USA - 2021"
-author: "Team - 02: Akshay Verma, Aveline Mariya Shaji and Uugangerel Bold"
-date: "`r Sys.Date()`"
-output:
-  html_document:
-    css: bootstrap.css
-    code_folding: hide
-    number_sections: no
-    toc: yes
-    toc_depth: 3
-    toc_float: yes
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
-  word_document:
-    toc: yes
-    toc_depth: '3'
-editor_options: 
-  markdown: 
-    wrap: 72
----
+An Analysis of Food Security in USA - 2021
+==========================================
 
-***
+Hi, this is the final prokect I did for my Intro to Data Science class at GW. We are trying to Classify Food Security in the United States. This is a typical classification problem with an imbalanced response class.
 
-# Precap
+We are using the CPS Data provided by the US Census Bureau. Since I was constrained by time, I couldn't do EDA on the dataset to an satisfactory level and had to select factors that made an intuitive sense. This lead to some problems in the classification as you'll see.
 
-This paper is an extension to the Exploratory Data Analysis of the **Analysis of Food Security in USA - 2021**. From the previous analysis, we brought down to 7 variables such as Family_Size, Household_Income, SNAP, Ethnicity, Citizenship_status, Hours_on_Jobs, Education_Level which has an effect on the FoodSecurity_score variable. The extended part will deal different classification techniques/models to predict the food insecurity.
+Hopefully, I'll continue to work on this project and keep updating it on here.
 
-***
+* * * * *
+
+* * * * *
 
 #### The models/techniques that we have used here are:
 
- -- Logistic Regression
- 
- -- KNN Algorithm
- 
- -- Decision Tree
+ Logistic Regression
 
-***
+KNN Algorithm
 
-#### Our SMART questions are below: 
+Decision Tree
 
---	Specific: To extend the EDA on the Census data to find out what combinations of socio-economic factors lead to food insecurity. 
-
---	Measurable: Measure the risk of food insecurity at different combinations of selected factors.
-
---	Achievable: Make a prediction model using logistic regression for the food insecurity. Extend the modelling using KNN and Random Forest.
-
---	Relevant: Food being the basic requirement of any human, this study can shed light on what the authorities and we ourselves can do in order to eradicate food insecurity.
-
---	Time-Oriented: Data set for the month of December 2021 is considered for the study and the study is expected to come-up with interesting results by early December 2022.
-
-***
-
-```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-library(dplyr)
-library(ezids)
-library(ggplot2)
-library(epiR)
-library(pROC)
-library(smotefamily)
-library(ROSE)
-library(ggthemes)
-library(caret)
-library(car)
-library(ROSE)
-
-```
-
-***
-
-# Dataset
-
-We have obtained the data from the US Census website using CPS data. The CSV file contains approximately a hundred thousand observations. 
-
-The link to our dataset is: 
-https://www2.census.gov/programs-surveys/cps/datasets/2021/supp/dec21pub.csv
-
-***
-
-```{r, echo=FALSE, cache=TRUE }
-Food_Sec <- data.frame(read.csv("dec21pub.csv"))
-```
-
-```{r, echo=FALSE, results='hide', message=FALSE}
+* * * * *
 
 
-FS_Subset <- subset(Food_Sec, HRINTSTA == 001 & HRSUPINT == 001 & HRFS12MD != -9)
-FS_Subset <- subset(FS_Subset, select = c(	"GESTFIPS",	"HRNUMHOU",	"HEFAMINC",	"HESP1",	"PTDTRACE",	"PRCITSHP",	"PEMJNUM",	"PEHRUSL1",	"PEEDUCA", "PRNMCHLD" , "HRFS12MD"))
+* * * * *
 
-  
+Dataset
+=======
 
-FS_Subset <- FS_Subset %>% rename("States" = "GESTFIPS", "Family_Size" = "HRNUMHOU",	"Household_Income" = "HEFAMINC",	"SNAP" = "HESP1",	"Ethnicity" =	"PTDTRACE", "Citizenship_status" = "PRCITSHP",	"Number_of_Jobs" = "PEMJNUM",	"Hours_on_Jobs" = "PEHRUSL1" , "Education_Level" = "PEEDUCA" , "Number_of_children" = "PRNMCHLD",  "FoodSecurity_score" = "HRFS12MD")
-```
+We have obtained the data from the US Census website using CPS data. The CSV file contains approximately a hundred thousand observations.
 
+The link to our dataset is: <https://www2.census.gov/programs-surveys/cps/datasets/2021/supp/dec21pub.csv>
 
+* * * * *
 
-```{r, echo=FALSE, results='hide', message=FALSE}
-## Converting the all the columns to factors as they are all ordinal(except the Id, but since it's categorical i'm converting it into a factor too)
-
-
-FS_Subset[] <- lapply( FS_Subset, factor)
-
-str(FS_Subset)
-
-```
-
-
-
-```{r, echo=FALSE, results='hide', message=FALSE}
-levels(FS_Subset$'FoodSecurity_score') <- c( "High Food Security", "Marginal Food Security", "Low Food Security", "Very Low Food Security")
-
-
-FS_Subset$FS_Status <- FS_Subset$FoodSecurity_score
-
-levels(FS_Subset$FS_Status) <- c( "Food Secure", "Food Secure", "Food Insecure", "Food Insecure")
-
-levels(FS_Subset$'Ethnicity') <- c('White only', 'Black only', 'American Indian, Alaskan native only', 'Asian Only', 'Hawaiian', 'White-black', 'White-AI', 'White-Asian', 'White-HP', 'Black-AI', 'Black-Asian', 'Black-HP', 'AI-Asian', 'AI-HP', 'Asian-HP', 'W-B-AI', 'W-B-A', 'W-B-HP', 'W-AI-A', 'W-AI-HP', 'W-A-HP', 'B-AI-A', 'W-B-AL-A', 'W-AI-A-HP', 'Other 3 race combo', 'Other 4 and 5 race combo')
-
-levels(FS_Subset$'Citizenship_status') <- c('NATIVE, BORN IN THE UNITED STATES', 'NATIVE, BORN IN PUERTO RICO OR OTHER U.S. ISLAND AREAS', 'NATIVE, BORN ABROAD OF AMERICAN PARENT OR PARENTS', 'FOREIGN BORN, U.S. CITIZEN BY NATURALIZATION', 'FOREIGN BORN, NOT A CITIZEN OF THE UNITED STATES')
-summary(FS_Subset$'Citizenship_status', title = "PRCITSHP")
-
-
-```
-
-```{r, echo=FALSE, results='hide', message=FALSE}
-table(FS_Subset$Ethnicity)
-
-## Lets drop all levels that have less than 10 observations.
-
-for(i in levels(FS_Subset$Ethnicity)) {
-  if(count(subset(FS_Subset, Ethnicity == i)) < 10){
-    print(i)
-    FS_Subset <- FS_Subset[!(FS_Subset$Ethnicity %in% c(i)), ]
-  }}
-
-FS_Subset$Ethnicity <- droplevels(FS_Subset$Ethnicity)
-     
-table(FS_Subset$Ethnicity)
-```
-
-
-
-# Logistic Regression
+Logistic Regression
+===================
 
 A sort of generalized linear model (GLM) called logistic regression is used in statistical analysis to forecast a binary event (i.e., dependent variable) based on predetermined variables. It estimates the likelihood that an event will occur by fitting data to a logit function.
 
 In this model, the binary outcome is whether the unit of observation (individuals within housing units) is Food Secure or not. The variables in the model will try to predict the binary outcome. Since the data set used in the model is unbalanced, we'll use try adding weights to the minority class and try under sampling the majority class to see whether that leads to an improvement in results.
 
-```{r, results ='hide'}
-set.seed(1)
 
-sample <- sample(c(TRUE, FALSE), nrow(FS_Subset), replace = TRUE, prob = c(0.6, 0.4))
-
-train <- FS_Subset[sample, ]
-test  <- FS_Subset[!sample, ]
-
-str(test)
-str(train)
-```
-
-
-
-```{r, echo=FALSE, results='hide', message=FALSE}
-logistic <- glm(FS_Status ~ Ethnicity +  Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = train, family = "binomial")
-```
-
-***
+* * * * *
 
 The model is predicting on the testing data, the cutoff is at 0.5
 
-```{r, results='markup'}
-
-logistic_model1.prob <- predict(logistic, test, type = "response")
-logistic_model1.pred = rep("Food Secure", dim(test)[1])
-logistic_model1.pred[logistic_model1.prob > .5] = "Food Insecure"
 
 
-tb <- table(logistic_model1.pred, test$FS_Status)
-tb[1:2,2:1]
+| Prediction     | Food Insecure | Food Secure     |
+| :---        |    :----:   |          ---: |
+|  Food Insecure       |  145        |  144   |
+|  Food Secure    | 2663     | 25684    |
 
 
-precision <- round(precision(tb[1:2,2:1])*100,2)
-recall <- round(recall(tb[1:2,2:1])*100,1)
 
+![](https://lh6.googleusercontent.com/bNDhvdLOMry3dMb6bGATQoa2mSXN57HhUYbibyE0uwS4yW_DHEHh0aIRDzn4Z-FjzCY2Kh60unS02LWEFAl19BDfjyD1lRt-1t-dy8N6DCfm6vQAPEE_x2H8vDHx1EbOeJBeZHqg5hP0fXTmynO5GPgyfrBLHp2Ky8f_0VzZUuOUCyneb1Q3qNto-IwFkw)
 
-lg_model_graph <- data.frame(precision , recall )
-p <- barplot(as.matrix(lg_model_graph),beside=TRUE, col=rgb(0.2,0.3,0.6,0.6), space = c(0.1, 0.1))
-text(x = p, y = lg_model_graph -  2, labels = lg_model_graph)
-
-
-```
-
-*** 
+* * * * *
 
 We decided that recall is important to us as we want to get our false negative lower as possible. False positives are inclusion errors, while false negatives are exclusion errors. It's better if we are able to more accurately identify who all are food insecure and need of aid rather than identifying who all are not food insecure and hence don't need aid.
 
-***
+* * * * *
 
 Lets look at the probability distribution of the our two response classes in our training dataset. We'll select a new cutoff from this
 
-```{r, results='markup'}
-train$logistic_model1_train.prob <- predict(logistic, train, type = "response")
 
-# distribution of the prediction score grouped by known outcome
-ggplot( train, aes( logistic_model1_train.prob, color = as.factor(FS_Status) ) ) + 
-geom_density( size = 1 ) +
-ggtitle( "Training Set's Predicted Score" ) + 
-scale_color_economist( name = "data", labels = c( "Food Secure", "Food Insecure" ) ) + 
-theme_economist()
+![](https://lh5.googleusercontent.com/Lplobsfn5FmWpQdxiXTw7s1VeHQwPi8DAWU4t0CkrDLj4YkG7VpRERITf9oCiL59adqBZJcyceyl2fbAR09J7dh-ZF_puhxp2aJqwvadGQElLXFfmCnAuDXXz9UGss3pljdWQjYFBTXm4O3yyAkIAM8TgEpmrru9h2BwE8JBi49Ctg4lx6Fa8b-kEXXLtQ)
 
-```
 We can see that the probability distribution is heavily right skewed. In our next attempt we will select the cutoff at 0.09.
 
-***
-
-```{r, results='markup'}
-test$logistic_model1.prob <- logistic_model1.prob
-roc_model1 <- roc(FS_Status ~ logistic_model1.prob, data = test)
-plot(roc_model1)
-auc(roc_model1)
+* * * * *
 
 
-```
+
+![](https://lh6.googleusercontent.com/po8fP6oU9NMUjYAncdvy4lWPuGw2s1C4ZsWxTrDs2FPIEMHaEFFqTWTubr4hR4PQ6_Uwp3Y0YKYx_GSyj9n8UdJO4dOMdBm96IxEcVo-Ya2kWA1XS0NWH58XI11UJVa3AGzUtiPX3UKnAP0Hx3FIgfqxQnEfFem954tfRefkBWO-hc0-wlcb4VqzUzwzag)
+
+
+
+## Area under the curve: 0.8698
 
 The area under curve is 0.87. Even though this seems good, but since our classes are imbalanced we can't put much significance to this metric in comparing different models.
 
-***
+* * * * *
 
 Now we change the cutoff to 0.09
 
 
-```{r, results='markup'}
-logistic_model_ncf.prob <- predict(logistic, test, type = "response")
-logistic_model_ncf.pred = rep("Food Secure", dim(test)[1])
-logistic_model_ncf.pred[logistic_model1.prob > .09] = "Food Insecure"
+| Prediction     | Food Insecure | Food Secure     |
+| :---        |    :----:   |          ---: |
+|  Food Insecure       |  2646         |  7579   |
+|  Food Secure    | 162    | 18249    |
 
 
-tb <- table(logistic_model_ncf.pred, test$FS_Status)
-tb[1:2,2:1]
 
+![](https://lh6.googleusercontent.com/DjpRwcaTHZdvn5dAjzi44MAxYwvZ3XGYa64TJn0dnrfClgOJ_iqvjVMtrGySgrI1wg1SBuv0MF_uLJHmpEO9BHklkP3uZXL-mqmZfgFJwlknZiTuEV8L5ZY-0L8ukFj3oMpxjJMfaZFjz7zqOf5r5qSe71GBLiWnpUiBeI-ZqcsbQmnNyHN3BSr0PeCRKg)
 
-precision <- round(precision(tb[1:2,2:1])*100,2)
-recall <- round(recall(tb[1:2,2:1])*100,1)
+As you can see our recall has increased to 94.2%, while our precision has come down to 25.9%. 
 
+We think this is better than our previous model since the previous model had just a recall of 5%.
 
-lg_model_graph <- data.frame(precision , recall )
-p <- barplot(as.matrix(lg_model_graph),beside=TRUE, col=rgb(0.2,0.3,0.6,0.6), space = c(0.1, 0.1))
-text(x = p, y = lg_model_graph -  2, labels = lg_model_graph)
-```
-
-As you can see our recall has increased to 94.2%, while our precision has come down to 25.9%. We think this is better than our previous model since the previous model had just a recall of 5%.
-
-***
+* * * * *
 
 The ration of Food Secure to Food Insecure in our data is 9.03. We are gonna add a weight equivalent to that to our minority class.
 
+* * * * *
 
-***
+-   We are going to be adding weights to the data so our minority class, which is food insecurity, affects the model more.
 
-* **We are going to be adding weights to the data so our minority class, which is food insecurity, affects the model more**.
 
+| Prediction     | Food Insecure | Food Secure     |
+| :---        |    :----:   |          ---: |
+|  Food Insecure       |  2645        |  7540   |
+|  Food Secure    | 163    | 18288    |
 
-```{r, echo=FALSE, results='hide', message=FALSE, cache = TRUE}
-weight_minority_class = sum(FS_Subset$FS_Status == "Food Secure")/sum(FS_Subset$FS_Status == "Food Insecure")
-for(i in seq_len(NROW(FS_Subset))){
-  
-if(FS_Subset$FS_Status[i] == "Food Insecure"){
-  FS_Subset$Weight[i] = weight_minority_class
 
-}
-  else
-    FS_Subset$Weight[i] = 1
-}
 
-FS_Subset$Weight <- as.numeric(FS_Subset$Weight)
-summary(FS_Subset$Weight)
+![](https://lh5.googleusercontent.com/rjb553OAb3B1TxttbQTlLwPv4QogxgSxgZp-i_ewPkhU1oCNZe0IyiJzQKRJLDzGClEGLg4SHVsgLAfA9RuLUPjnWltbEliqeQcRFiYx3lavm3t0tDdK4AHSWNfnFSDOzh18ohb0C5p1D8Et6h0ZXJdeeaviptRDVFFSgpi2GbV6IggfHOAu8yHxRbenhw)
 
-## Splitting again because train and test doesn't contain the weight column
+-   As you can see even though our classification rate of the model went down and the precision of model went down drastically, we were able to raise our recall rate significantly.
 
-set.seed(1)
+-   But this result is almost the same as the one we got from the model where we changed the cutoff to 0.09.
 
-sample <- sample(c(TRUE, FALSE), nrow(FS_Subset), replace = TRUE, prob = c(0.6, 0.4))
+* * * * *
 
-train <- FS_Subset[sample, ]
-test  <- FS_Subset[!sample, ]
 
-```
 
+![](https://lh5.googleusercontent.com/4qxz3lImXkLPBMZw96g5lREaUnwk-b4TSHbNBgV2-j6xDHucYbP7DhRuS8sxmUD023QNeDNLd1pW8D2_B4MMNxNGnmwXUAwBmN-nVRxTRnj7pdl9kkPkjSOoN8eIIR6cQ0xkWvfaJnPUwT2IWWPFWcGiKXrxoB79FzKTKtRSbbjOSvY7eZ-bZ2LITfNCpg)
 
 
-```{r, echo=FALSE, results='hide', message=FALSE}
 
-logistic_weighted <- glm(FS_Status ~ Ethnicity +  Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = train,  weights = Weight, family = "binomial")
+## Area under the curve: 0.8699
 
+-   The response probability distribution of this model looks very different from the previous models. We can clearly see two response classes are clearly separated for most part.
 
-```
+-   The little overlap that is visible may be due to the fact that our response originally had 4 classes but we had converted it into binary.
 
+* * * * *
 
-```{r, results='markup'}
 
-logistic_model2.prob <- predict(logistic_weighted, test, type = "response")
-logistic_model2.pred = rep("Food Secure", dim(test)[1])
-logistic_model2.pred[logistic_model2.prob > .5] = "Food Insecure"
 
+![](https://lh4.googleusercontent.com/BD6t2jjQMreRqwG5YiwvhamsYL-8OvTlLza-vMZPWPJ2AX4yVdbDfOMAZFxCKh0zhyfhavz7pZiMYCeGyhSlxn7OVTH3A2ZlTzM799jeVIaEeU2ITD7zNwQPLj2JxLANDZaY5r7HvEYxn_7v6SkuNF11tFhNHUcLKkYI4Zdhko5CqFDcIT6lE33nzSqxAQ)
 
+* * * * *
 
-tb <- table(logistic_model2.pred, test$FS_Status)
-tb[1:2,2:1]
+-   Trying to balance data by under sampling. We are using the ROSE library to do this
 
+| Prediction     | Food Insecure | Food Secure     |
+| :---        |    :----:   |          ---: |
+|  Food Insecure       |  2644          |  7633   |
+|  Food Secure    | 164    | 18195    |
 
-precision <- round(precision(tb[1:2,2:1])*100,2)
-recall <- round(recall(tb[1:2,2:1])*100,1)
 
+![](https://lh5.googleusercontent.com/SCGoM3yIKJ5sWupz8ymCv20Y9BeGIboTrCcU2CE3P1vyVPLImg9dVh6Gcs--W7uk98lu5V-ciLz97GIdx2qxlCSRMzAujmK39kFP055KgaW07eKVGX4Qf6KlQW7pxKdAEBBpW5WUgHeYPNWIBdp2G2yldmehaTfgOoKAbeFkNs1Bx1M9m6wn8vMdqMw-gA) 
 
-lg_model_graph <- data.frame(precision , recall )
-p <- barplot(as.matrix(lg_model_graph),beside=TRUE, col=rgb(0.2,0.3,0.6,0.6), space = c(0.1, 0.1))
-text(x = p, y = lg_model_graph -  2, labels = lg_model_graph)
+* As you can see the results are almost the same as the previous models.
 
 
-```
 
+![](https://lh6.googleusercontent.com/SDQWI9jiB-FCUYpa34HQ7QRv4dAhioZDuYyMjlrHD0wvUgRIRSYO68Got6UdhkNJ4Uop8TcvB7vYlBPtEHGof_P_z0W4Fwqh-ezHDvNVqt-y4-zm1YrGQM2Y_rAOeGLrrndfNA3ryrTEH-25nruVOAZE12KzZ_3g62LTdFBF0271tCeeghyYriJXrzFnGQ)
 
-* As you can see even though our classification rate of the model went down and the precision of model went down drastically, we were able to raise our recall rate significantly. 
+-   The probability distribution also looks the same as the previous model.
 
-* But this result is almost the same as the one we got from the model where we changed the cutoff to 0.09. 
+* * * * *
 
-***
-
-```{r, results='markup'}
-test$logistic_model2.prob <- logistic_model2.prob
-roc_model2 <- roc(FS_Status ~ logistic_model2.prob, data = test)
-plot(roc_model2)
-auc(roc_model2)
-
-
-
-```
-
-* The response probability distribution of this model looks very different from the previous models. We can clearly see two response classes are clearly separated for most part. 
-
-* The little overlap that is visible may be due to the fact that our response originally had 4 classes but we had converted it into binary.
-
-***
-
-```{r, results='markup'}
-
-train$logistic_model2_train.prob <- predict(logistic_weighted, train, type = "response")
-
-# distribution of the prediction score grouped by known outcome
-ggplot( train, aes( logistic_model2_train.prob, color = as.factor(FS_Status) ) ) + 
-geom_density( size = 1 ) +
-ggtitle( "Training Set's Predicted Score" ) + 
-scale_color_economist( name = "data", labels = c( "Food Secure", "Food Insecure" ) ) + 
-theme_economist()
-
-
-```
-
-
-*** 
-
-* Trying to balance data by under sampling. We are using the ROSE library to do this
-
-```{r,echo=FALSE, results='hide', message=FALSE}
-
-data.balanced.ou <- ovun.sample(FS_Status~., data=train, p=0.5,  seed=1, method="under")$data
-
-
-
-
-```
-
-```{r, echo=FALSE, results='hide', message=FALSE}
-logistic_both <- glm(FS_Status ~ Ethnicity + Family_Size + Household_Income:SNAP + Citizenship_status + Number_of_Jobs + Education_Level   , data = data.balanced.ou,   family = "binomial")
-
-```
-
-```{r, results='markup'}
-
-logistic_model3.prob <- predict(logistic_both, test, type = "response")
-logistic_model3.pred = rep("Food Secure", dim(test)[1])
-logistic_model3.pred[logistic_model3.prob > .5] = "Food Insecure"
-
-
-
-
-tb <- table(logistic_model3.pred, test$FS_Status)
-tb[1:2,2:1]
-
-
-precision <- round(precision(tb[1:2,2:1])*100,2)
-recall <- round(recall(tb[1:2,2:1])*100,1)
-
-
-lg_model_graph <- data.frame(precision , recall )
-p <- barplot(as.matrix(lg_model_graph),beside=TRUE, col=rgb(0.2,0.3,0.6,0.6), space = c(0.1, 0.1))
-text(x = p, y = lg_model_graph -  2, labels = lg_model_graph)
-
-```
-* As you can see the results are almost the same as the previous models. 
-
-```{r, results='markup'}
-train$logistic_model3_train.prob <- predict(logistic_both, train, type = "response")
-ggplot( train, aes( logistic_model3_train.prob, color = as.factor(FS_Status) ) ) + 
-geom_density( size = 1 ) +
-ggtitle( "Training Set's Predicted Score" ) + 
-scale_color_economist( name = "data", labels = c( "Food Secure", "Food Insecure" ) ) + 
-theme_economist()
-```
-
-* The probability distribution also looks the same as the previous model.
-
-
-***
-
-
-# K-Nearest Neighbors
+K-Nearest Neighbors
+===================
 
 K-Nearest Neighbor is a Supervised ML Algorithm used to solve both Classification and Regression models. K-NN algorithm assumes the similarity between the new case /data and available cases and put the new case into the category that is most similar to the available categories.It is also called a lazy learner algorithm because it does not learn from the training set immediately instead it stores the dataset and at the time of classification, it performs an action on the dataset. KNN models shows high accuracy for classification problems.
 
 ##### Preparing Data for KNN
 
 The preparation of Data for KNN starts with selecting variables. As KNN only accepts numeric variables in or it needs to be transformed to numeric. Since only ordinal variables can be transformed to numeric, we eliminate nominal variables and hence, the list of variables used for KNN model are - Family Size, Household Income, SNAP, Number of jobs, Hours of Job, Number of Children. The predicting variable FS_Status remains binary but numeric.
- 
-```{r, results='markup', echo=FALSE}
-knn_data <- FS_Subset
-knn_data$Family_Size <- as.numeric(FS_Subset$Family_Size)
-knn_data$Household_Income <- as.numeric(FS_Subset$Household_Income)
-knn_data$SNAP <- as.numeric(FS_Subset$SNAP)
-knn_data$Number_of_Jobs <- as.numeric(FS_Subset$Number_of_Jobs)
-knn_data$Hours_on_Jobs <- as.numeric(FS_Subset$Hours_on_Jobs)
-knn_data$Number_of_children <- as.numeric(FS_Subset$Number_of_children)
-knn_data$FS_Status <- as.numeric(FS_Subset$FS_Status)
-num_data <- select_if(knn_data, is.numeric)
-num_data <- as.data.frame(num_data[-c(8)])
-num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 1, 3)
-num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 2, 1)
-num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 3, 2)
-num_data$FS_Status <- replace(num_data$FS_Status, num_data$FS_Status == 2, 0)
-str(num_data)
-```
+
+## 'data.frame':    71442 obs. of  7 variables:
+
+##  $ Family_Size       : num  1 2 2 2 2 2 2 2 2 1 ...
+
+##  $ Household_Income  : num  16 14 14 12 12 13 13 9 9 11 ...
+
+##  $ SNAP              : num  3 3 3 5 5 3 3 5 5 3 ...
+
+##  $ Number_of_Jobs    : num  1 1 1 1 1 1 1 1 1 1 ...
+
+##  $ Hours_on_Jobs     : num  67 43 2 43 43 62 43 2 2 2 ...
+
+##  $ Number_of_children: num  1 2 1 1 1 1 1 1 1 1 ...
+
+##  $ FS_Status         : num  0 0 0 0 0 0 0 0 0 0 ...
 
 ##### Balanced Data for KNN
 
-The data is unbalanced as we mentioned above. The number of food secure units of observations are very few when compared to food secured. This issue is resolved in Logstic Regression by adding weights as a hypervariable. But for KNN, sampling methods needs to be used to resolve this isse. The two options are Under-sampling and Up-sampling. Even though, new methods are coming out like creating artificial data points, the accuracy of the model through such model is still debatable. 
+The data is unbalanced as we mentioned above. The number of food secure units of observations are very few when compared to food secured. This issue is resolved in Logstic Regression by adding weights as a hypervariable. But for KNN, sampling methods needs to be used to resolve this isse. The two options are Under-sampling and Up-sampling. Even though, new methods are coming out like creating artificial data points, the accuracy of the model through such model is still debatable.
 
-This does not hide the fact that under-sampling can lead to data lose as we are discarding a lot of observation units and up-sampling will cause over-fitting in the model. Trying both techniques and finding the best model is a considerable solution but it depends on the resources and time. 
+This does not hide the fact that under-sampling can lead to data lose as we are discarding a lot of observation units and up-sampling will cause over-fitting in the model. Trying both techniques and finding the best model is a considerable solution but it depends on the resources and time.
 
-For the KNN model discussed below, we choose for Under-sampling. The results based on both sampling technique in data are discussed here. Now the data is balanced and we continue with data pre-processing. 
+For the KNN model discussed below, we choose for Under-sampling. The results based on both sampling technique in data are discussed here. Now the data is balanced and we continue with data pre-processing.
 
-```{r, results='markup', echo=FALSE}
-data_balanced_under <- as.data.frame(ovun.sample(FS_Status ~ ., data = num_data, method = "both", N = nrow(num_data), seed = 1)$data)
-table(data_balanced_under$FS_Status)
-```
-```{r,results='markup', echo=FALSE}
-num_data <- data_balanced_under
-str(num_data)
-```
+## 
+
+##     0     1 
+
+## 35621 35821
+
+## 'data.frame':    71442 obs. of  7 variables:
+
+##  $ Family_Size       : num  1 3 2 2 2 5 6 4 6 7 ...
+
+##  $ Household_Income  : num  7 9 6 14 16 16 16 12 15 14 ...
+
+##  $ SNAP              : num  5 4 5 3 3 3 3 3 3 5 ...
+
+##  $ Number_of_Jobs    : num  1 1 1 1 1 1 1 1 1 1 ...
+
+##  $ Hours_on_Jobs     : num  1 2 2 2 43 18 2 53 2 43 ...
+
+##  $ Number_of_children: num  1 1 1 1 1 1 1 1 1 6 ...
+
+##  $ FS_Status         : num  0 0 0 0 0 0 0 0 0 0 ...
 
 For preparing the data for KNN, we selected numerical variables. Scaling the data is the next step. The algorithm should not be biased towards variables with higher magnitude. To overcome this problem, bring down all the variables to the same scale. Feature Scaling is inevitable for KNN. If not scaled, the feature with large value range will dominate while calculating distances. KNN which uses Euclidean distance needs scaling when the features has a broad range of values.
 
-```{r, echo=FALSE, results='hide', message=FALSE}
-scaledata <- as.data.frame(scale(num_data, center = TRUE, scale = TRUE))
-str(scaledata)
-```
-
 We also need to create test and train data sets, we will do this slightly differently by using the sample function. The 2 says create 2 data sets essentially, replacement means we can reset the random sampling across each vector and the probability gives sample the weight of the splits, 2/3 for train, 1/3 for test. So here 67% of the sample is taken as training data and 33% as testing data.
-
-```{r, echo=FALSE, results='hide', message=FALSE}
-set.seed(1000)
-knn_sample <- sample(2, nrow(scaledata), replace=TRUE, prob=c(0.67, 0.33))
-```
 
 We then just need to use the new variable to create the test/train outputs, selecting the first four rows as they are the numeric data in the iris data set and we want to predict Species. And then we need to create our Y variables or labels need to input into the KNN function.
 
-```{r, results='markup', echo=FALSE}
-# X variables
-knn_training <- scaledata[knn_sample==1, 1:6]
-knn_test <- scaledata[knn_sample==2, 1:6]
-# Y variable
-knn.trainLabels <- num_data[knn_sample==1, 7]
-knn.testLabels <- num_data[knn_sample==2, 7]
-```
-
-```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-# Loading package
-library(e1071)
-library(caTools)
-library(class)
-loadPkg("gmodels")
-loadPkg("gmodels")
-loadPkg("FNN")
-loadPkg("caret")
-library(class)
-```
-
 ##### Building KNN Model
 
-
-```{r, results='markup'}
 # create an empty dataframe to store the results from confusion matrices
+
 ResultDf = data.frame( k=numeric(0), Total.Accuracy= numeric(0), row.names = NULL )
-```
 
-```{r, results='hide', echo=FALSE}
-kseq <- seq(3,15,2)
-for (kval in kseq) 
-  {
-  print( paste("k = ", kval) )
-  knn_pred <- knn(train = knn_training, test = knn_test, cl=knn.trainLabels, k=kval)
-  knn_crosst <- CrossTable(knn.testLabels, knn_pred, prop.chisq = FALSE)
-  
-  knn_crosst
-  # 
-  cm = confusionMatrix(knn_pred, reference = as.factor(knn.testLabels )) # from caret library
-  # print.confusionMatrix(cm)
-  # 
-  cmaccu = cm$overall['Accuracy']
-  #print( paste("Total Accuracy = ", cmaccu ) )
-  # print("Other metrics : ")
-  # print(cm$byClass)
-  # 
-  cmt = data.frame(k=kval, Total.Accuracy = cmaccu, row.names = NULL ) # initialize a row of the metrics 
-  # cmt = cbind( cmt, data.frame( t(cm$byClass) ) ) # the dataframe of the transpose, with k valued added in front
-  ResultDf = rbind(ResultDf, cmt)
-  print( xkabledply(   as.matrix(cm), title = paste("ConfusionMatrix for k = ",kval ) ) )
-  print( xkabledply(data.frame(cm$byClass), title=paste("k = ",kval)) )
-  }
-```
+|
 
-```{r, results='markup', echo=FALSE}
-ResultDf = rbind(ResultDf, cmt)
+k
 
-xkabledply(ResultDf, "Total Accuracy Summary")
-```
+ |
 
-```{r, results='markup', echo=FALSE}
-ggplot(ResultDf,aes(x = k, y = Total.Accuracy)) +
-  geom_line(color = "maroon", size = 1.5) +
-  geom_point(size = 3) + 
-  labs(title = "Accuracy vs k")
-```
+Total.Accuracy
 
-From the above table and graph, it is quite clear that k=15 KNN model gives the most accuracy. Since the predicted variable is binary, we take into consideration k values which are odd. 
+ |
+|
 
-From the above results, the least accuracy is when k = 3, which is 81.49% and the maximum is for when k = 15 and it goes high up to 83.59%. Now we use confusion matrix of KNN model when k=15, to derive more information. 
+3
 
-```{r, results='markup', echo=FALSE}
-library(class)
-knn_pred <- knn(train = knn_training, test = knn_test, cl=knn.trainLabels, k=15)
-knn_crosst <- gmodels::CrossTable(x = knn.testLabels, y = knn_pred, prop.chisq = FALSE)
-```
+ |
 
-*Total Number of Observations = 23430.
-*True Negative = 9145 :- 39% of the observations were correctly predicted as NOT Food Insecure
-*True Positive = 9912 :- 42% are correctly identified as Food Insecure.
-*There were 1807 cases of False Negatives (FN). The FN’s poses a potential threat for the reason that model predicts 8% of the total observations as Food Secure, but was actually food insecure and the main focus to increase the accuracy of the model is to reduce FN’s.
-*There were 2556 cases of False Positives (FP) meaning 11% were actually food secure in nature but got predicted as food insecure. 
-*The total accuracy of the model is 83.59 % ((TN+TP)/Total) which shows that the model is good. But still there is scope of improvement.
+0.8149
 
+ |
+|
 
-```{r, results='markup'}
+5
+
+ |
+
+0.8279
+
+ |
+|
+
+7
+
+ |
+
+0.8293
+
+ |
+|
+
+9
+
+ |
+
+0.8327
+
+ |
+|
+
+11
+
+ |
+
+0.8342
+
+ |
+|
+
+13
+
+ |
+
+0.8353
+
+ |
+|
+
+15
+
+ |
+
+0.8359
+
+ |
+|
+
+15
+
+ |
+
+0.8359
+
+ |
+
+![](https://lh3.googleusercontent.com/aT8aZIaZMkmGbP3SM1I2hnvMM3nXF2RcDCjNlCVUrcIcj6zZSWjRFE9PpKVsw3yUTQqwcg3Pobyx9ryDyPclUJqZCu0mcrosm3PirpJNHAle-k1q9jWfAjIbVXNINmI0BofFng96HZo-PsnETPoJgCfQVKNRRiLPF4BFY8Rl9Zf0M7iEhaVzBKNoR7Fm3g)
+
+From the above table and graph, it is quite clear that k=15 KNN model gives the most accuracy. Since the predicted variable is binary, we take into consideration k values which are odd.
+
+From the above results, the least accuracy is when k = 3, which is 81.49% and the maximum is for when k = 15 and it goes high up to 83.59%. Now we use confusion matrix of KNN model when k=15, to derive more information.
+
+## 
+
+##  
+
+##    Cell Contents
+
+## |-------------------------|
+
+## |                       N |
+
+## |           N / Row Total |
+
+## |           N / Col Total |
+
+## |         N / Table Total |
+
+## |-------------------------|
+
+## 
+
+##  
+
+## Total Observations in Table:  23420 
+
+## 
+
+##  
+
+##                | knn_pred 
+
+## knn.testLabels |         0 |         1 | Row Total | 
+
+## ---------------|-----------|-----------|-----------|
+
+##              0 |      8658 |      3043 |     11701 | 
+
+##                |     0.740 |     0.260 |     0.500 | 
+
+##                |     0.915 |     0.218 |           | 
+
+##                |     0.370 |     0.130 |           | 
+
+## ---------------|-----------|-----------|-----------|
+
+##              1 |       800 |     10919 |     11719 | 
+
+##                |     0.068 |     0.932 |     0.500 | 
+
+##                |     0.085 |     0.782 |           | 
+
+##                |     0.034 |     0.466 |           | 
+
+## ---------------|-----------|-----------|-----------|
+
+##   Column Total |      9458 |     13962 |     23420 | 
+
+##                |     0.404 |     0.596 |           | 
+
+## ---------------|-----------|-----------|-----------|
+
+## 
+
+##
+
+Total Number of Observations = 23430. True Negative = 9145 :- 39% of the observations were correctly predicted as NOT Food Insecure True Positive = 9912 :- 42% are correctly identified as Food Insecure. There were 1807 cases of False Negatives (FN). The FN's poses a potential threat for the reason that model predicts 8% of the total observations as Food Secure, but was actually food insecure and the main focus to increase the accuracy of the model is to reduce FN's. There were 2556 cases of False Positives (FP) meaning 11% were actually food secure in nature but got predicted as food insecure. The total accuracy of the model is 83.59 % ((TN+TP)/Total) which shows that the model is good. But still there is scope of improvement.
+
 xkabledply(data.frame(cm$byClass), title=paste("k = ",15))
-```
 
-##### KNN Model: Conclusion 
-Sensitivity is designate a food insecure individual as Food Insecure.A highly sensitive test means that there are few false negative results, and thus fewer cases of Food Insecurity are missed. For this model the Sensitivity is `r cm$byClass[1]*100`%
+|\
+ |
 
-Specificity is designate a food secure individual as negative. A high specificity makes sure that, the projects for eradicating Food Insecurity focuses on the right population. Specificity for this model is `r cm$byClass[2]*100`%
+cm.byClass
 
-# Trees
+ |
+|
 
-```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-# Loading package
-library("caret")
-library("dplyr")
-library("data.tree")
-library("caTools")
-library("rpart.plot")
-library("RColorBrewer")
-library("rattle")
-library("ISLR")
-library("tree") 
-library("rpart")
-```
+Sensitivity
+
+ |
+
+0.7399
+
+ |
+|
+
+Specificity
+
+ |
+
+0.9317
+
+ |
+|
+
+Pos Pred Value
+
+ |
+
+0.9154
+
+ |
+|
+
+Neg Pred Value
+
+ |
+
+0.7821
+
+ |
+|
+
+Precision
+
+ |
+
+0.9154
+
+ |
+|
+
+Recall
+
+ |
+
+0.7399
+
+ |
+|
+
+F1
+
+ |
+
+0.8184
+
+ |
+|
+
+Prevalence
+
+ |
+
+0.4996
+
+ |
+|
+
+Detection Rate
+
+ |
+
+0.3697
+
+ |
+|
+
+Detection Prevalence
+
+ |
+
+0.4038
+
+ |
+|
+
+Balanced Accuracy
+
+ |
+
+0.8358
+
+ |
+
+##### KNN Model: Conclusion
+
+Sensitivity is designate a food insecure individual as Food Insecure.A highly sensitive test means that there are few false negative results, and thus fewer cases of Food Insecurity are missed. For this model the Sensitivity is 73.9936758%
+
+Specificity is designate a food secure individual as negative. A high specificity makes sure that, the projects for eradicating Food Insecurity focuses on the right population. Specificity for this model is 93.173479%
+
+Trees
+=====
+
 #Using Decision Tree
 
-
-```{r, echo = T, fig.dim=c(6,4)}
 tree1 <- rpart(FS_Status ~ Ethnicity + Family_Size + Household_Income + SNAP + Citizenship_status + Number_of_Jobs + Education_Level, data=data.balanced.ou, method="class")
-printcp(tree1) # display the results 
-plotcp(tree1) # visualize cross-validation results 
 
-# plot tree 
+printcp(tree1) # display the results
+
+## 
+
+## Classification tree:
+
+## rpart(formula = FS_Status ~ Ethnicity + Family_Size + Household_Income + 
+
+##     SNAP + Citizenship_status + Number_of_Jobs + Education_Level, 
+
+##     data = data.balanced.ou, method = "class")
+
+## 
+
+## Variables actually used in tree construction:
+
+## [1] SNAP
+
+## 
+
+## Root node error: 4266/8577 = 0.49738
+
+## 
+
+## n= 8577 
+
+## 
+
+##        CP nsplit rel error  xerror      xstd
+
+## 1 0.68026      0   1.00000 1.03047 0.0108513
+
+## 2 0.01000      1   0.31974 0.31974 0.0079392
+
+plotcp(tree1) # visualize cross-validation results
+
+# plot tree 
+
 plotcp(tree1)
+
+![](https://lh3.googleusercontent.com/LVkcBUxJ6OO-gmcjTBvapi2rZIyo_pEwFJ-EPRUPRC7XhijZtND1JUYDiHts-jsJTR6Phh9xrw3Y3cQ3B0J2CstFgdfvqZmpA3b7kL9MYjxdcEF9FmRdF9Gf0QFzzczi4g3A17R7Vfg9_pptQ-ZIatUHaP0pp4hKYIsXAIRN4naie1H2frHYd5WTZRUiSw)
+
 #text(tree1, use.n=TRUE, all=TRUE, cex=.8)
+
 rpart.plot(tree1)
 
+![](https://lh5.googleusercontent.com/OGf-KMNAcUrSF2Y8RduOjmHkWoQBU_F85-1mzAmdBFStMLBCaOE1Qd86jYzBY-rQUvhaYGK7GtaNemtWfOdfDlSxRhOzax37GLIXhwqUUMTCk221F2xSQST5MquspTJsVnObT2qz1iVddZLCkncfeXFjqSghDLDyzMZV46W_gCpopvZuffyDidS2sdyUlw)
+
 predict_unseen <-predict(tree1, test, type = 'class')
+
 table_mat <- table(predict_unseen, test$FS_Status)
+
 table_mat[2:1,2:1]
-```
 
+##                
 
-```{r}
+## predict_unseen  Food Insecure Food Secure
+
+##   Food Insecure          2655        7650
+
+##   Food Secure             153       18178
+
 accuracy_tune <- function(tree1) {
-    predict_unseen <- predict(tree1, test, type = 'class')
-    table_mat <- table(test$FS_Status, predict_unseen)
-    accuracy_Test <- sum(diag(table_mat)) / sum(table_mat)
-    accuracy_Test
+
+predict_unseen <- predict(tree1, test, type = 'class')
+
+    table_mat <- table(test$FS_Status, predict_unseen)
+
+    accuracy_Test <- sum(diag(table_mat)) / sum(table_mat)
+
+    accuracy_Test
+
 }
+
 control <- rpart.control(minsplit = 4,
-    minbucket = round(5 / 3),
-    maxdepth = 3,
-    cp = 0.0001)
+
+    minbucket = round(5 / 3),
+
+maxdepth = 3,
+
+cp = 0.0001)
+
 tune_fit <- rpart(FS_Status ~ Ethnicity + Family_Size + Household_Income + SNAP + Citizenship_status + Number_of_Jobs + Education_Level , data = data.balanced.ou, method = 'class', control = control)
+
 accuracy_tune(tune_fit)
-```
 
-```{r}
+## [1] 0.7241584
+
 tree2 <- rpart(FS_Status ~ Ethnicity + Family_Size + Household_Income + SNAP + Citizenship_status + Number_of_Jobs + Education_Level, data=data.balanced.ou, method="class", control = control)
-printcp(tree2) # display the results 
-plotcp(tree2) # visualize cross-validation results 
 
-# plot tree 
+printcp(tree2) # display the results
+
+## 
+
+## Classification tree:
+
+## rpart(formula = FS_Status ~ Ethnicity + Family_Size + Household_Income + 
+
+##     SNAP + Citizenship_status + Number_of_Jobs + Education_Level, 
+
+##     data = data.balanced.ou, method = "class", control = control)
+
+## 
+
+## Variables actually used in tree construction:
+
+## [1] Family_Size      Household_Income SNAP            
+
+## 
+
+## Root node error: 4266/8577 = 0.49738
+
+## 
+
+## n= 8577 
+
+## 
+
+##           CP nsplit rel error  xerror      xstd
+
+## 1 0.68026254      0   1.00000 1.00000 0.0108545
+
+## 2 0.00093765      1   0.31974 0.31974 0.0079392
+
+## 3 0.00023441      3   0.31786 0.31997 0.0079416
+
+## 4 0.00010000      5   0.31739 0.31997 0.0079416
+
+plotcp(tree2) # visualize cross-validation results
+
+# plot tree 
+
 plotcp(tree2)
+
+![](https://lh5.googleusercontent.com/EuPWeIdEKRkj11aMUDK9DgICZo_jSP52XkLjwH9aJlk5GA94nPPxIhdhfj-vyMH5tgOcPSjf8MZRLeRPsJQLahfzATCcDnWk6qvToqm4lBkCMUzlS8jrYivYY3ZswUbo6Gm9mB2yLSHPNaM87VyuVKV5_B_sppX1xe6UsF7YzDsIelUD3EcvaqvSVw3stQ)
+
 #text(tree1, use.n=TRUE, all=TRUE, cex=.8)
+
 rpart.plot(tree2)
-```
 
+![](https://lh5.googleusercontent.com/H1yP3P6jfsbx2t_eM0cvaoLbppJu89qtVFNWtdBZhXfk8bblwuJuKmv0wXm-PEh-LmKmM3xs9KRrV1E31F7qH-xG7-jvl3Q9xdJitHT9WtswThBORvp63l1KDrCyEzIkh3BWQU-Y8pro0rI5CpaM8ztblsd1WJRm_LH3-NR5YmXoC9oyop2t5DRV2RUU-Q)
 
-```{r, results='markup'}
 predict_unseen <-predict(tree2, test, type = 'class')
-table_mat <- table(predict_unseen, test$FS_Status)
-table_mat[2:1,2:1]
-```
 
-# Conclusions and further recommendations
+table_mat <- table(predict_unseen, test$FS_Status)
+
+table_mat[2:1,2:1]
+
+##                
+
+## predict_unseen  Food Insecure Food Secure
+
+##   Food Insecure          2661        7752
+
+##   Food Secure             147       18076
+
+Conclusions and further recommendations
+=======================================
 
 SNAP is the most important factor in food security in our models. In future, We could remove SNAP or take SNAP longitudinally to make some analysis; as the correlation between SNAP and food insecurity is almost tautological - Only a food insecure person would have SNAP and Food secure person won't have SNAP.
 
 We saw that KNN performs better than other models for these factors.
+
+
 
 # References
 
@@ -652,3 +679,4 @@ We saw that KNN performs better than other models for these factors.
 •	https://www.webpages.uidaho.edu/~stevel/519/How%20to%20get%20correlation%20between%20two%20categorical%20variable%20and%20a%20categorical%20variable%20and%20continuous%20variable.html
 •	http://statseducation.com/Introduction-to-R/modules/graphics/cont/
 •	https://www.tutorialspoint.com/r/r_mean_median_mode.htm
+
